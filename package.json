@@ -1,16 +1,12 @@
 {
   "name": "school-management-system",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:css": "npx @tailwindcss/cli -i ./static/css/src/input.css -o ./static/css/dist/output.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./static/css/src/input.css -o ./static/css/dist/output.css --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
-    "tailwindcss": "^4.3.2"
+    "tailwindcss": "^4.3.2",
+    "@tailwindcss/cli": "^4.3.2"
   }
 }
