@@ -23,5 +23,11 @@ class User(AbstractUser):
     default=Role.STUDENT,
   )
 
+  # Makes `createsuperuser` prompt for role explicitly, instead of every
+  # superuser silently defaulting to role=STUDENT while is_staff=True -
+  # a mismatch that would pass Django admin's own checks but fail our
+  # RoleRequiredMixin/role_required checks confusingly.
+  REQUIRED_FIELDS = ["email", "role"]
+
   def __str__(self):
     return f"{self.get_full_name() or self.username} ({self.role})"

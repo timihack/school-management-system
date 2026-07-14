@@ -7,5 +7,17 @@
        class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
       Dashboard
     </a>
+    {% if request.user.role == "ADMIN" %}
+    <a href="{% url 'dashboard:admin_area' %}"
+       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+      Admin Area
+    </a>
+    {% endif %}
+    {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
+    <a href="{% url 'dashboard:reports_preview' %}"
+       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+      Reports
+    </a>
+    {% endif %}
   </nav>
 </aside>

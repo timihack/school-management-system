@@ -53,6 +53,14 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Enforces login-required on EVERY view by default. Views that must be
+    # publicly reachable (login page, password reset, webhooks, etc.) opt
+    # out explicitly via the login_not_required() decorator. This is a
+    # deliberate secure-by-default choice: across ~25 modules, it's easier
+    # to forget one @login_required than to forget one login_not_required
+    # on a genuinely public view (which will fail loudly and immediately
+    # in testing, rather than silently exposing a page).
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -86,6 +94,10 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "accounts.User"
+
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "dashboard:home"
+LOGOUT_REDIRECT_URL = "accounts:login"
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
