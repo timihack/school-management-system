@@ -42,9 +42,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third-party
+    "django_htmx",
+
     # Local apps
     "apps.accounts",
     "apps.dashboard",
+    "apps.students",
 ]
 
 MIDDLEWARE = [
@@ -53,6 +57,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     # Enforces login-required on EVERY view by default. Views that must be
     # publicly reachable (login page, password reset, webhooks, etc.) opt
     # out explicitly via the login_not_required() decorator. This is a

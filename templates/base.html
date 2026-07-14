@@ -1,4 +1,4 @@
-{% load static %}
+{% load static django_htmx %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
@@ -6,14 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}School Management System{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/dist/output.css' %}" />
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  {% htmx_script %}
 </head>
-<body class="h-full bg-slate-50 text-slate-800">
+<body class="h-full bg-slate-50 text-slate-800" hx-headers='{"x-csrftoken": "{{ csrf_token}}"}'>
   <div class="flex h-full">
     {% include "partials/sidebar.html" %}
     <div class="flex-1 flex flex-col">
       {% include "partials/topbar.html" %}
       <main class="flex-1 p-6 overflow-y-auto">
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-lg px-4 py-2 text-sm border
+                      {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border-emerald-200
+                      {% elif message.tags == 'error' %}bg-red-50 text-red-700 border-red-200
+                      {% else %}bg-slate-50 text-slate-700 border-slate-200{% endif %}">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% block content %}{% endblock %}
       </main>
     </div>
