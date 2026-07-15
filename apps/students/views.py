@@ -62,7 +62,12 @@ class StudentDetailView(RoleRequiredMixin, View):
 
     def get(self, request, pk):
         student = get_object_or_404(selectors.get_student_list(), pk=pk)
-        return render(request, "students/student_detail.html", {"student": student})
+        guardianships = student.guardianships.select_related("parent__user")
+        return render(
+            request,
+            "students/student_detail.html",
+            {"student": student, "guardianships": guardianships},
+        )
 
 
 class StudentUpdateView(RoleRequiredMixin, View):

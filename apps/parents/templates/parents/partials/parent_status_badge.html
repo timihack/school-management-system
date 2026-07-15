@@ -1,0 +1,5 @@
+<span id="parent-status-badge-{{ parent.pk }}"
+      class="px-2 py-1 rounded-full text-xs font-medium
+             {% if parent.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+  {% if parent.is_active %}Active{% else %}Inactive{% endif %}
+</span>

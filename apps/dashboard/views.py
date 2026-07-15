@@ -2,17 +2,27 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 
 from apps.accounts.models import User
+from apps.parents import selectors as parent_selectors
+from apps.parents.models import Parent
 from core.permissions.decorators import role_required
 from core.permissions.mixins import RoleRequiredMixin
 
 
 def home(request):
     """
-    Shared landing page for every authenticated role right now. Per-role
-    dashboards (distinct widgets for admin vs teacher vs student) will
-    replace this view in later phases as each domain module gets built -
-    for now, everyone lands here after login.
+    Branches by role for the first time. Admin/Staff/Teacher still see
+    the shared placeholder dashboard - Parent gets a genuinely different
+    page showing only THEIR OWN children, via
+    parent_selectors.get_children_for_parent(), which is where the real
+    data-isolation guarantee lives (see apps/parents/selectors.py).
     """
+    if request.user.role == User.Role.PARENT:
+        parent = Parent.objects.filter(user=request.user).first()
+        children = parent_selectors.get_children_for_parent(parent) if parent else []
+        return render(
+            request, "dashboard/parent_home.html", {"parent": parent, "children": children}
+        )
+
     return render(request, "dashboard/home.html")
 
 

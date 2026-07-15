@@ -12,6 +12,10 @@
        class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
       Students
     </a>
+    <a href="{% url 'parents:list' %}"
+       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+      Parents
+    </a>
     {% endif %}
     {% if request.user.role == "ADMIN" %}
     <a href="{% url 'dashboard:admin_area' %}"

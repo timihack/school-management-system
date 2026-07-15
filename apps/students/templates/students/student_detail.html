@@ -19,6 +19,26 @@
     <div class="col-span-2"><dt class="text-slate-500">Address</dt><dd>{{ student.address|default:"—" }}</dd></div>
   </dl>
 
+  <div class="mt-6">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Guardians</h2>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for guardianship in guardianships %}
+      <div class="p-4">
+        <a href="{% url 'parents:detail' guardianship.parent.pk %}"
+           class="font-medium text-indigo-600 hover:underline">
+          {{ guardianship.parent.user.get_full_name|default:guardianship.parent.user.username }}
+        </a>
+        <p class="text-xs text-slate-500">
+          {{ guardianship.get_relationship_display }}
+          {% if guardianship.is_primary_contact %} · Primary contact{% endif %}
+        </p>
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No guardians linked yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
   {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
   <div class="mt-4 flex gap-3">
     <a href="{% url 'students:update' student.pk %}"

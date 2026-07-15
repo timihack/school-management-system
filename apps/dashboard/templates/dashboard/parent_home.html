@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-xl font-semibold text-slate-800 mb-4">My Children</h1>
+
+{% if not parent %}
+<p class="text-slate-500">
+  Your account isn't linked to a parent profile yet. Please contact the school office.
+</p>
+{% elif not children %}
+<p class="text-slate-500">No children are linked to your account yet.</p>
+{% else %}
+<div class="grid gap-4 sm:grid-cols-2">
+  {% for child in children %}
+  <div class="bg-white border border-slate-200 rounded-xl p-4">
+    <p class="font-medium text-slate-800">
+      {{ child.user.get_full_name|default:child.user.username }}
+    </p>
+    <p class="text-sm text-slate-500">Admission No. {{ child.admission_number }}</p>
+    <p class="text-sm text-slate-500">{{ child.get_gender_display }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
