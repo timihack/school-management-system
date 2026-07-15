@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-xl font-semibold text-slate-800">
+        {{ parent.user.get_full_name|default:parent.user.username }}
+      </h1>
+      {% include "parents/partials/parent_status_badge.html" %}
+    </div>
+
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      <div><dt class="text-slate-500">Email</dt><dd>{{ parent.user.email }}</dd></div>
+      <div><dt class="text-slate-500">Occupation</dt><dd>{{ parent.occupation|default:"—" }}</dd></div>
+      <div><dt class="text-slate-500">Phone</dt><dd>{{ parent.phone_number|default:"—" }}</dd></div>
+      <div class="col-span-2"><dt class="text-slate-500">Address</dt><dd>{{ parent.address|default:"—" }}</dd></div>
+    </dl>
+
+    {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
+    <div class="mt-4 flex gap-3">
+      <a href="{% url 'parents:update' parent.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+      {% if request.user.role == "ADMIN" and parent.is_active %}
+      <button hx-post="{% url 'parents:deactivate' parent.pk %}"
+              hx-target="#parent-status-badge-{{ parent.pk }}"
+              hx-swap="outerHTML"
+              hx-confirm="Deactivate {{ parent.user.get_full_name }}? They will no longer be able to log in."
+              class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+        Deactivate
+      </button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Children</h2>
+      {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
+      <a href="{% url 'parents:link_child' parent.pk %}"
+         class="text-sm font-medium text-indigo-600 hover:underline">+ Link a Child</a>
+      {% endif %}
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for guardianship in guardianships %}
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <a href="{% url 'students:detail' guardianship.student.pk %}"
+             class="font-medium text-indigo-600 hover:underline">
+            {{ guardianship.student.user.get_full_name|default:guardianship.student.user.username }}
+          </a>
+          <p class="text-xs text-slate-500">
+            {{ guardianship.get_relationship_display }}
+            {% if guardianship.is_primary_contact %} · Primary contact{% endif %}
+            {% if guardianship.can_pickup %} · Can pick up{% endif %}
+          </p>
+        </div>
+        {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
+        <form method="post" action="{% url 'parents:unlink_child' guardianship.pk %}"
+              onsubmit="return confirm('Unlink {{ guardianship.student }} from this parent?');">
+          {% csrf_token %}
+          <button type="submit" class="text-xs text-red-600 hover:underline">Unlink</button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No children linked yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
