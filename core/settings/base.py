@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "apps.dashboard",
     "apps.students",
     "apps.parents",
-    # "apps.teachers",
+    "apps.teachers",
 
     # Third-party, security
     "axes",
