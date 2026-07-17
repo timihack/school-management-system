@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-slate-800">
+      {{ staff.user.get_full_name|default:staff.user.username }}
+    </h1>
+    {% include "staff/partials/staff_status_badge.html" %}
+  </div>
+
+  <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+    <div><dt class="text-slate-500">Employee ID</dt><dd>{{ staff.employee_id }}</dd></div>
+    <div><dt class="text-slate-500">Job Title</dt><dd>{{ staff.job_title|default:"—" }}</dd></div>
+    <div><dt class="text-slate-500">Employment Type</dt><dd>{{ staff.get_employment_type_display }}</dd></div>
+    <div><dt class="text-slate-500">Date Joined</dt><dd>{{ staff.date_joined }}</dd></div>
+    <div><dt class="text-slate-500">Date of Birth</dt><dd>{{ staff.date_of_birth }}</dd></div>
+    <div><dt class="text-slate-500">Phone</dt><dd>{{ staff.phone_number|default:"—" }}</dd></div>
+    <div><dt class="text-slate-500">Email</dt><dd>{{ staff.user.email }}</dd></div>
+    <div class="col-span-2"><dt class="text-slate-500">Address</dt><dd>{{ staff.address|default:"—" }}</dd></div>
+  </dl>
+
+  <!--
+    Edit is shown to Admin OR to this staff member's own record - the
+    view enforces the real check server-side; this just avoids showing
+    a button that would 403 for anyone else.
+  -->
+  {% if request.user.role == "ADMIN" or staff.user_id == request.user.id %}
+  <div class="mt-4 flex gap-3">
+    <a href="{% url 'staff:update' staff.pk %}"
+       class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+    {% if request.user.role == "ADMIN" and staff.is_active %}
+    <button hx-post="{% url 'staff:deactivate' staff.pk %}"
+            hx-target="#staff-status-badge-{{ staff.pk }}"
+            hx-swap="outerHTML"
+            hx-confirm="Deactivate {{ staff.user.get_full_name }}? They will no longer be able to log in."
+            class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+      Deactivate
+    </button>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

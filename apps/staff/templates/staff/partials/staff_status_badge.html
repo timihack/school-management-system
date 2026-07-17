@@ -1,0 +1,5 @@
+<span id="staff-status-badge-{{ staff.pk }}"
+      class="px-2 py-1 rounded-full text-xs font-medium
+             {% if staff.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+  {% if staff.is_active %}Active{% else %}Inactive{% endif %}
+</span>
