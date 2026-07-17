@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "apps.students",
     "apps.parents",
     "apps.teachers",
+    "apps.staff",
 
     # Third-party, security
     "axes",

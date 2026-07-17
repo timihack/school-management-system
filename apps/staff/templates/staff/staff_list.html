@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-xl font-semibold text-slate-800">Staff</h1>
+  {% if request.user.role == "ADMIN" %}
+  <a href="{% url 'staff:create' %}"
+     class="bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-indigo-700">
+    + Add Staff
+  </a>
+  {% endif %}
+</div>
+
+<div class="flex gap-3 mb-4">
+  <input type="text" name="search" value="{{ filters.search }}"
+         placeholder="Search by name, employee ID, or job title..."
+         class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+         hx-get="{% url 'staff:list' %}"
+         hx-target="#staff-table-container"
+         hx-trigger="input changed delay:400ms, search"
+         hx-include="[name='status']">
+  <select name="status"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          hx-get="{% url 'staff:list' %}"
+          hx-target="#staff-table-container"
+          hx-trigger="change"
+          hx-include="[name='search']">
+    <option value="all" {% if filters.status == "all" %}selected{% endif %}>All</option>
+    <option value="active" {% if filters.status == "active" %}selected{% endif %}>Active</option>
+    <option value="inactive" {% if filters.status == "inactive" %}selected{% endif %}>Inactive</option>
+  </select>
+</div>
+
+<div id="staff-table-container">
+  {% include "staff/partials/staff_table.html" %}
+</div>
+{% endblock %}
