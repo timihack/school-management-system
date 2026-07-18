@@ -1,6 +1,7 @@
 from django import forms
 
 from apps.accounts.models import User
+from apps.departments.models import Department
 
 from .models import Staff
 from .validators import validate_date_joined_not_in_future, validate_staff_date_of_birth
@@ -43,6 +44,11 @@ class StaffCreateForm(forms.Form):
     address = forms.CharField(
         required=False, widget=forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3})
     )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": TAILWIND_INPUT}),
+    )
 
     def clean_employee_id(self):
         employee_id = self.cleaned_data["employee_id"]
@@ -72,10 +78,11 @@ class StaffUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Staff
-        fields = ["job_title", "employment_type", "phone_number", "address"]
+        fields = ["job_title", "employment_type", "phone_number", "address", "department"]
         widgets = {
             "job_title": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
             "employment_type": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "phone_number": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
             "address": forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3}),
+            "department": forms.Select(attrs={"class": TAILWIND_INPUT}),
         }

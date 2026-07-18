@@ -5,6 +5,7 @@ from datetime import date
 from django.db import transaction
 
 from apps.accounts.models import User
+from apps.departments.models import Department
 
 from .models import Staff
 
@@ -21,6 +22,7 @@ class StaffCreateData:
     employment_type: str = Staff.EmploymentType.FULL_TIME
     phone_number: str = ""
     address: str = ""
+    department: "Department | None" = None
 
 
 def _generate_temporary_password() -> str:
@@ -50,6 +52,7 @@ def create_staff(data: StaffCreateData) -> tuple[Staff, str]:
         date_joined=data.date_joined,
         phone_number=data.phone_number,
         address=data.address,
+        department=data.department,
     )
 
     return staff, temporary_password
