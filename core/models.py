@@ -48,5 +48,26 @@ class EmploymentProfileBase(TimestampedModel):
     address = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
+    # Added in Phase 7, once Departments existed to reference. This is
+    # the actual payoff of extracting EmploymentProfileBase in Phase 6:
+    # this ONE field addition gives Teacher AND Staff a department FK
+    # simultaneously - apps/teachers/models.py and apps/staff/models.py
+    # needed ZERO changes for this. SET_NULL (not CASCADE) is deliberate:
+    # deleting a Department should unassign its members, never delete
+    # the people themselves.
+    #
+    # related_name uses %(class)s to avoid a clash: without it, BOTH
+    # Teacher and Staff would try to register the same reverse accessor
+    # name on Department, which Django rejects. %(class)s resolves to
+    # each concrete subclass's own lowercased name at migration time -
+    # "teacher_set" for Teacher, "staff_set" for Staff.
+    department = models.ForeignKey(
+        "departments.Department",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_set",
+    )
+ 
     class Meta:
         abstract = True

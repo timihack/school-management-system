@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "apps.dashboard",
     "apps.students",
     "apps.parents",
+    "apps.departments",
     "apps.teachers",
     "apps.staff",
 

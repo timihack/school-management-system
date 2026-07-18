@@ -1,6 +1,7 @@
 from django import forms
 
 from apps.accounts.models import User
+from apps.departments.models import Department
 
 from .models import Teacher
 from .validators import validate_date_joined_not_in_future, validate_teacher_date_of_birth
@@ -39,6 +40,11 @@ class TeacherCreateForm(forms.Form):
     address = forms.CharField(
         required=False, widget=forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3})
     )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": TAILWIND_INPUT}),
+    )
 
     def clean_employee_id(self):
         employee_id = self.cleaned_data["employee_id"]
@@ -72,9 +78,10 @@ class TeacherUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Teacher
-        fields = ["qualification", "phone_number", "address"]
+        fields = ["qualification", "phone_number", "address", "department"]
         widgets = {
             "qualification": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
             "phone_number": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
             "address": forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3}),
+            "department": forms.Select(attrs={"class": TAILWIND_INPUT}),
         }

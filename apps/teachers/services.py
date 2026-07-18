@@ -5,6 +5,7 @@ from datetime import date
 from django.db import transaction
 
 from apps.accounts.models import User
+from apps.departments.models import Department
 
 from .models import Teacher
 
@@ -20,6 +21,7 @@ class TeacherCreateData:
     qualification: str = ""
     phone_number: str = ""
     address: str = ""
+    department: "Department | None" = None
 
 
 def _generate_temporary_password() -> str:
@@ -48,6 +50,7 @@ def create_teacher(data: TeacherCreateData) -> tuple[Teacher, str]:
         date_joined=data.date_joined,
         phone_number=data.phone_number,
         address=data.address,
+        department=data.department,
     )
 
     return teacher, temporary_password

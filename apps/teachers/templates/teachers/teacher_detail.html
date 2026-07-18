@@ -12,6 +12,16 @@
   <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
     <div><dt class="text-slate-500">Employee ID</dt><dd>{{ teacher.employee_id }}</dd></div>
     <div><dt class="text-slate-500">Qualification</dt><dd>{{ teacher.qualification|default:"—" }}</dd></div>
+    <div>
+      <dt class="text-slate-500">Department</dt>
+      <dd>
+        {% if teacher.department %}
+        <a href="{% url 'departments:detail' teacher.department.pk %}" class="text-indigo-600 hover:underline">
+          {{ teacher.department.name }}
+        </a>
+        {% else %}—{% endif %}
+      </dd>
+    </div>
     <div><dt class="text-slate-500">Date of Birth</dt><dd>{{ teacher.date_of_birth }}</dd></div>
     <div><dt class="text-slate-500">Date Joined</dt><dd>{{ teacher.date_joined }}</dd></div>
     <div><dt class="text-slate-500">Phone</dt><dd>{{ teacher.phone_number|default:"—" }}</dd></div>

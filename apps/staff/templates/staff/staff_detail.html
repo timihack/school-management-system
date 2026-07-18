@@ -12,6 +12,16 @@
   <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
     <div><dt class="text-slate-500">Employee ID</dt><dd>{{ staff.employee_id }}</dd></div>
     <div><dt class="text-slate-500">Job Title</dt><dd>{{ staff.job_title|default:"—" }}</dd></div>
+    <div>
+      <dt class="text-slate-500">Department</dt>
+      <dd>
+        {% if staff.department %}
+        <a href="{% url 'departments:detail' staff.department.pk %}" class="text-indigo-600 hover:underline">
+          {{ staff.department.name }}
+        </a>
+        {% else %}—{% endif %}
+      </dd>
+    </div>
     <div><dt class="text-slate-500">Employment Type</dt><dd>{{ staff.get_employment_type_display }}</dd></div>
     <div><dt class="text-slate-500">Date Joined</dt><dd>{{ staff.date_joined }}</dd></div>
     <div><dt class="text-slate-500">Date of Birth</dt><dd>{{ staff.date_of_birth }}</dd></div>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-xl font-semibold text-slate-800">{{ department.name }}</h1>
+    </div>
+
+    <dl class="grid grid-cols-1 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      <div>
+        <dt class="text-slate-500">Head of Department</dt>
+        <dd>{{ department.head_of_department.get_full_name|default:"—" }}</dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">Description</dt>
+        <dd>{{ department.description|default:"—" }}</dd>
+      </div>
+    </dl>
+
+    {% if request.user.role == "ADMIN" %}
+    <div class="mt-4 flex gap-3">
+      <a href="{% url 'departments:update' department.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+      <form method="post" action="{% url 'departments:delete' department.pk %}"
+            onsubmit="return confirm('Delete {{ department.name }}? Teachers and staff currently assigned will be unassigned, not deleted.');">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+          Delete
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Teachers ({{ teachers.count }})</h2>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for teacher in teachers %}
+      <div class="p-4">
+        <a href="{% url 'teachers:detail' teacher.pk %}" class="text-indigo-600 hover:underline">
+          {{ teacher.user.get_full_name|default:teacher.user.username }}
+        </a>
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No teachers assigned yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Staff ({{ staff_members.count }})</h2>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for staff in staff_members %}
+      <div class="p-4">
+        <a href="{% url 'staff:detail' staff.pk %}" class="text-indigo-600 hover:underline">
+          {{ staff.user.get_full_name|default:staff.user.username }}
+        </a>
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No staff assigned yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
