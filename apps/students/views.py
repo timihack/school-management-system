@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
+from apps.classes import selectors as class_selectors
 from core.permissions.mixins import RoleRequiredMixin
 
 from . import permissions, selectors, services
@@ -63,10 +64,15 @@ class StudentDetailView(RoleRequiredMixin, View):
     def get(self, request, pk):
         student = get_object_or_404(selectors.get_student_list(), pk=pk)
         guardianships = student.guardianships.select_related("parent__user")
+        current_enrollment = class_selectors.get_current_enrollment(student)
         return render(
             request,
             "students/student_detail.html",
-            {"student": student, "guardianships": guardianships},
+            {
+                "student": student,
+                "guardianships": guardianships,
+                "current_enrollment": current_enrollment,
+            },
         )
 
 

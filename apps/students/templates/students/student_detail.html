@@ -20,6 +20,29 @@
   </dl>
 
   <div class="mt-6">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Current Class</h2>
+    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+      {% if current_enrollment %}
+      <div>
+        <a href="{% url 'classes:detail' current_enrollment.class_level.pk %}" class="font-medium text-indigo-600 hover:underline">
+          {{ current_enrollment.class_level.name }}{% if current_enrollment.class_arm %} {{ current_enrollment.class_arm.name }}{% endif %}
+        </a>
+        {% if current_enrollment.is_repeat %}
+        <span class="ml-2 text-xs text-amber-600">(Repeat)</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <p class="text-sm text-slate-400">Not yet assigned to a class.</p>
+      {% endif %}
+      {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
+      <a href="{% url 'classes:enroll_student' student.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">
+        {% if current_enrollment %}Change Class{% else %}Assign to Class{% endif %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-6">
     <h2 class="text-lg font-semibold text-slate-800 mb-3">Guardians</h2>
     <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
       {% for guardianship in guardianships %}

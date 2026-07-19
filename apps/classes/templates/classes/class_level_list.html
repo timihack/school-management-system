@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-xl font-semibold text-slate-800">Class Levels</h1>
+  {% if request.user.role == "ADMIN" %}
+  <a href="{% url 'classes:create' %}"
+     class="bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-indigo-700">
+    + Add Class Level
+  </a>
+  {% endif %}
+</div>
+
+<div class="mb-4">
+  <input type="text" name="search" value="{{ filters.search }}"
+         placeholder="Search by name or category..."
+         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+         hx-get="{% url 'classes:list' %}"
+         hx-target="#class-level-table-container"
+         hx-trigger="input changed delay:400ms, search">
+</div>
+
+<div id="class-level-table-container">
+  {% include "classes/partials/class_level_table.html" %}
+</div>
+{% endblock %}
