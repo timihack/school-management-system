@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg">
+  <h1 class="text-xl font-semibold text-slate-800 mb-4">
+    {% if class_level %}Edit Class Level{% else %}Add Class Level{% endif %}
+  </h1>
+
+  <form method="post" class="space-y-4 bg-white border border-slate-200 rounded-xl p-6">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="block text-sm font-medium text-slate-600 mb-1">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+      <p class="text-xs text-slate-400 mt-1">{{ field.help_text }}</p>
+      {% endif %}
+      {% if field.errors %}
+      <p class="text-xs text-red-600 mt-1">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit"
+      class="w-full bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-indigo-700">
+      Save
+    </button>
+  </form>
+</div>
+{% endblock %}

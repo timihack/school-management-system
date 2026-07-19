@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-xl font-semibold text-slate-800">{{ class_level.name }}</h1>
+      <span class="text-xs text-slate-400">{{ class_level.get_category_display }}</span>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      <div><dt class="text-slate-500">Order</dt><dd>{{ class_level.order }}</dd></div>
+      <div><dt class="text-slate-500">Has Arms</dt><dd>{% if class_level.has_arms %}Yes{% else %}No{% endif %}</dd></div>
+      <div><dt class="text-slate-500">Assessment Type</dt><dd>{{ class_level.get_assessment_type_display }}</dd></div>
+      <div>
+        <dt class="text-slate-500">Promotes To</dt>
+        <dd>
+          {% if class_level.exit_requires_arm_placement %}
+            Special arm placement (not a direct promotion)
+          {% elif class_level.promotes_to %}
+            <a href="{% url 'classes:detail' class_level.promotes_to.pk %}" class="text-indigo-600 hover:underline">
+              {{ class_level.promotes_to.name }}
+            </a>
+          {% else %}
+            — (terminal level)
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+
+    {% if request.user.role == "ADMIN" %}
+    <div class="mt-4 flex gap-3">
+      <a href="{% url 'classes:update' class_level.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+      <a href="{% url 'classes:policy_update' class_level.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Promotion Policy</a>
+      <form method="post" action="{% url 'classes:delete' class_level.pk %}"
+            onsubmit="return confirm('Delete {{ class_level.name }}? This is blocked if any student has enrollment history here.');">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+          Delete
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Promotion Policy Summary</h2>
+    </div>
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      {% if class_level.assessment_type == "SCORE_BASED" %}
+      <div><dt class="text-slate-500">Pass Percentage</dt><dd>{{ policy.pass_percentage }}%</dd></div>
+      <div><dt class="text-slate-500">Basis</dt><dd>{{ policy.get_promotion_basis_display }}</dd></div>
+      <div><dt class="text-slate-500">Gatekeeper Pass Mark</dt><dd>{{ policy.get_gatekeeper_pass_mark_mode_display }}</dd></div>
+      <div><dt class="text-slate-500">Gatekeeper Logic</dt><dd>{{ policy.get_gatekeeper_logic_display }}</dd></div>
+      {% else %}
+      <div class="col-span-2"><dt class="text-slate-500">Skill-Based Promotion Mode</dt><dd>{{ policy.get_skill_based_promotion_mode_display|default:"Not set" }}</dd></div>
+      {% endif %}
+    </dl>
+  </div>
+
+  {% if class_level.has_arms %}
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Arms</h2>
+      {% if request.user.role == "ADMIN" %}
+      <a href="{% url 'classes:arm_create' class_level.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">+ Add Arm</a>
+      {% endif %}
+    </div>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for arm in arms %}
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="font-medium text-slate-800">{{ arm.name }}</p>
+          <p class="text-xs text-slate-500">
+            Class Teacher: {{ arm.class_teacher.user.get_full_name|default:"Not assigned" }}
+          </p>
+        </div>
+        {% if request.user.role == "ADMIN" %}
+        <div class="flex gap-3 text-xs">
+          <a href="{% url 'classes:arm_update' arm.pk %}" class="text-indigo-600 hover:underline">Edit</a>
+          <form method="post" action="{% url 'classes:arm_delete' arm.pk %}"
+                onsubmit="return confirm('Delete arm {{ arm }}?');">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No arms created yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
