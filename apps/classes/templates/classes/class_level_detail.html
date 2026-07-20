@@ -34,6 +34,8 @@
          class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
       <a href="{% url 'classes:policy_update' class_level.pk %}"
          class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Promotion Policy</a>
+      <a href="{% url 'subjects:grading_scale_detail' class_level.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Grading Scale</a>
       <form method="post" action="{% url 'classes:delete' class_level.pk %}"
             onsubmit="return confirm('Delete {{ class_level.name }}? This is blocked if any student has enrollment history here.');">
         {% csrf_token %}

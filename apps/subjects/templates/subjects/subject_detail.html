@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-xl font-semibold text-slate-800">{{ subject.name }}</h1>
+      <span class="px-2 py-1 rounded-full text-xs font-medium
+                   {% if subject.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+        {% if subject.is_active %}Active{% else %}Inactive{% endif %}
+      </span>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      <div><dt class="text-slate-500">Code</dt><dd>{{ subject.code|default:"—" }}</dd></div>
+      <div><dt class="text-slate-500">Assessment Type</dt><dd>{{ subject.get_assessment_type_display }}</dd></div>
+      <div class="col-span-2">
+        <dt class="text-slate-500">Taught At</dt>
+        <dd>
+          {% for level in subject.class_levels.all %}
+          <a href="{% url 'classes:detail' level.pk %}" class="text-indigo-600 hover:underline">{{ level.name }}</a>{% if not forloop.last %}, {% endif %}
+          {% empty %}—{% endfor %}
+        </dd>
+      </div>
+      {% if subject.assessment_type == "SCORE_BASED" or subject.computation_method %}
+      <div><dt class="text-slate-500">Computation Method</dt><dd>{{ subject.get_computation_method_display }}</dd></div>
+      {% endif %}
+      {% if subject.assessment_components.exists %}
+      <div><dt class="text-slate-500">CA Total</dt><dd>{{ subject.ca_max_total }}</dd></div>
+      <div><dt class="text-slate-500">Exam Total</dt><dd>{{ subject.exam_max_total }}</dd></div>
+      <div><dt class="text-slate-500">Overall Total</dt><dd>{{ subject.overall_max_score }}</dd></div>
+      {% endif %}
+    </dl>
+
+    {% if request.user.role == "ADMIN" %}
+    <div class="mt-4 flex gap-3">
+      <a href="{% url 'subjects:update' subject.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+      <form method="post" action="{% url 'subjects:delete' subject.pk %}"
+            onsubmit="return confirm('Delete {{ subject.name }}?');">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+          Delete
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!--
+    Both sections shown unconditionally, not either/or by assessment_type -
+    a real report card (AOS Montessori) showed a domain with BOTH a
+    numeric CA/Exam/Total AND a skill checklist underneath it. A subject
+    with no rows of a given type just shows its empty state below,
+    rather than the section being hidden outright.
+  -->
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Assessment Components</h2>
+      {% if request.user.role == "ADMIN" %}
+      <a href="{% url 'subjects:component_create' subject.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">+ Add Component</a>
+      {% endif %}
+    </div>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for component in components %}
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="font-medium text-slate-800">{{ component.name }}</p>
+          <p class="text-xs text-slate-500">{{ component.get_component_type_display }} · Max {{ component.max_score }}</p>
+        </div>
+        {% if request.user.role == "ADMIN" %}
+        <form method="post" action="{% url 'subjects:component_delete' component.pk %}"
+              onsubmit="return confirm('Remove {{ component.name }}?');">
+          {% csrf_token %}
+          <button type="submit" class="text-xs text-red-600 hover:underline">Remove</button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No components defined yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Skill Checklist</h2>
+      {% if request.user.role == "ADMIN" %}
+      <a href="{% url 'subjects:skill_item_create' subject.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">+ Add Skill Item</a>
+      {% endif %}
+    </div>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for item in skill_items %}
+      <div class="flex items-center justify-between p-4">
+        <p class="text-slate-800">{{ item.description }}</p>
+        {% if request.user.role == "ADMIN" %}
+        <form method="post" action="{% url 'subjects:skill_item_delete' item.pk %}"
+              onsubmit="return confirm('Remove this skill item?');">
+          {% csrf_token %}
+          <button type="submit" class="text-xs text-red-600 hover:underline">Remove</button>
+        </form>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No skill items defined yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

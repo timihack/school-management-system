@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold text-slate-800">Grading Scale</h1>
+    {% if request.user.role == "ADMIN" %}
+    <a href="{% url 'subjects:grade_band_create' class_level.pk %}"
+       class="bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-indigo-700">
+      + Add Band
+    </a>
+    {% endif %}
+  </div>
+  <p class="text-sm text-slate-500 mb-4">{{ class_level.name }}</p>
+
+  <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+    {% for band in bands %}
+    <div class="flex items-center justify-between p-4">
+      <div>
+        <p class="font-medium text-slate-800">{{ band.label }}</p>
+        <p class="text-xs text-slate-500">
+          {{ band.min_percentage }}-{{ band.max_percentage }}%
+          {% if band.description %} · {{ band.description }}{% endif %}
+        </p>
+      </div>
+      {% if request.user.role == "ADMIN" %}
+      <form method="post" action="{% url 'subjects:grade_band_delete' band.pk %}"
+            onsubmit="return confirm('Remove band {{ band.label }}?');">
+        {% csrf_token %}
+        <button type="submit" class="text-xs text-red-600 hover:underline">Remove</button>
+      </form>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p class="p-4 text-sm text-slate-400">No grade bands defined yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
