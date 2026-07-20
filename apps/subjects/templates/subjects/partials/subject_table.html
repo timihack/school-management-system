@@ -1,0 +1,53 @@
+<table class="w-full text-sm">
+  <thead>
+    <tr class="text-left text-slate-500 border-b border-slate-200">
+      <th class="py-2 pr-4">Name</th>
+      <th class="py-2 pr-4">Code</th>
+      <th class="py-2 pr-4">Assessment Type</th>
+      <th class="py-2 pr-4">Status</th>
+      <th class="py-2 pr-4"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for subject in page_obj %}
+    <tr class="border-b border-slate-100">
+      <td class="py-2 pr-4">
+        <a href="{% url 'subjects:detail' subject.pk %}" class="text-indigo-600 hover:underline">
+          {{ subject.name }}
+        </a>
+      </td>
+      <td class="py-2 pr-4">{{ subject.code|default:"—" }}</td>
+      <td class="py-2 pr-4">{{ subject.get_assessment_type_display }}</td>
+      <td class="py-2 pr-4">
+        <span class="px-2 py-1 rounded-full text-xs font-medium
+                     {% if subject.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+          {% if subject.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
+      </td>
+      <td class="py-2 pr-4">
+        <a href="{% url 'subjects:detail' subject.pk %}" class="text-indigo-600 hover:underline">View</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="py-4 text-slate-400 text-center">No subjects found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="flex justify-between items-center mt-4 text-sm text-slate-500">
+  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}
+    <a hx-get="{% url 'subjects:list' %}?page={{ page_obj.previous_page_number }}&search={{ filters.search }}&status={{ filters.status }}"
+       hx-target="#subject-table-container"
+       href="?page={{ page_obj.previous_page_number }}"
+       class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Previous</a>
+    {% endif %}
+    {% if page_obj.has_next %}
+    <a hx-get="{% url 'subjects:list' %}?page={{ page_obj.next_page_number }}&search={{ filters.search }}&status={{ filters.status }}"
+       hx-target="#subject-table-container"
+       href="?page={{ page_obj.next_page_number }}"
+       class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Next</a>
+    {% endif %}
+  </div>
+</div>

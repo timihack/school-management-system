@@ -70,19 +70,33 @@ class PromotionPolicyForm(forms.ModelForm):
         fields = [
             "pass_percentage",
             "promotion_basis",
+            "cumulative_method",
             "gatekeeper_pass_mark_mode",
             "gatekeeper_custom_pass_mark",
             "gatekeeper_logic",
+            "gatekeeper_subjects",
             "skill_based_promotion_mode",
         ]
         widgets = {
             "pass_percentage": forms.NumberInput(attrs={"class": TAILWIND_INPUT}),
             "promotion_basis": forms.Select(attrs={"class": TAILWIND_INPUT}),
+            "cumulative_method": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "gatekeeper_pass_mark_mode": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "gatekeeper_custom_pass_mark": forms.NumberInput(attrs={"class": TAILWIND_INPUT}),
             "gatekeeper_logic": forms.Select(attrs={"class": TAILWIND_INPUT}),
+            "gatekeeper_subjects": forms.SelectMultiple(attrs={"class": TAILWIND_INPUT, "size": 6}),
             "skill_based_promotion_mode": forms.Select(attrs={"class": TAILWIND_INPUT}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Restricted to subjects actually taught at THIS level, reached
+        # purely via the reverse relation (class_level.subjects) - no
+        # `from apps.subjects.models import Subject` needed here, so
+        # apps.classes stays Python-import-decoupled from apps.subjects
+        # even though the underlying data relationship now points both
+        # ways.
+        self.fields["gatekeeper_subjects"].queryset = self.instance.class_level.subjects.all()
 
     def clean(self):
         cleaned_data = super().clean()

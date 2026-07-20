@@ -133,6 +133,18 @@ class ClassEnrollment(TimestampedModel):
     student = models.ForeignKey(
         "students.Student", on_delete=models.CASCADE, related_name="class_enrollments"
     )
+    # Added in Phase 10, once AcademicSession existed to reference - the
+    # deferred field flagged at the end of Phase 8/9. PROTECT, same
+    # reasoning as class_level below: losing which SESSION an enrollment
+    # belonged to is a comparably serious data loss, not one to silently
+    # null out.
+    academic_session = models.ForeignKey(
+        "terms.AcademicSession",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="class_enrollments",
+    )
     # PROTECT, not SET_NULL: losing which class a student was in during
     # a past term is a more serious data loss than an unassigned
     # department (Phase 7) - deleting a ClassLevel that has ANY
@@ -203,6 +215,13 @@ class PromotionPolicy(TimestampedModel):
         THIRD_TERM_ONLY = "THIRD_TERM_ONLY", "Third term only"
         CUMULATIVE_ALL_TERMS = "CUMULATIVE_ALL_TERMS", "Cumulative (all terms)"
 
+    class CumulativeMethod(models.TextChoices):
+        SIMPLE_AVERAGE = "SIMPLE_AVERAGE", "Simple average across all terms"
+        RECURSIVE_BROUGHT_FORWARD = (
+            "RECURSIVE_BROUGHT_FORWARD",
+            "Recursive Brought-Forward average (each term averaged with the running cumulative)",
+        )
+
     class GatekeeperPassMarkMode(models.TextChoices):
         SAME_AS_OVERALL = "SAME_AS_OVERALL", "Same as overall pass percentage"
         CUSTOM = "CUSTOM", "Custom pass mark for gatekeeper subjects"
@@ -220,6 +239,20 @@ class PromotionPolicy(TimestampedModel):
         ClassLevel, on_delete=models.CASCADE, related_name="promotion_policy"
     )
 
+    # Added in Phase 9, once Subject existed to reference - the exact
+    # deferred field flagged at the end of Phase 8. String FK
+    # ("subjects.Subject"), same mechanism as every other cross-app FK
+    # in this project (Parent.students -> "students.Student",
+    # EmploymentProfileBase.department -> "departments.Department") -
+    # apps.classes never needs a literal Python import of
+    # apps.subjects.models for this to resolve correctly.
+    gatekeeper_subjects = models.ManyToManyField(
+        "subjects.Subject",
+        blank=True,
+        related_name="gatekeeper_for_policies",
+        help_text="Subjects where failing can force a repeat regardless of overall percentage.",
+    )
+
     # --- Applies when class_level.assessment_type == SCORE_BASED ---
     pass_percentage = models.PositiveSmallIntegerField(
         default=40,
@@ -228,6 +261,22 @@ class PromotionPolicy(TimestampedModel):
     )
     promotion_basis = models.CharField(
         max_length=25, choices=PromotionBasis.choices, default=PromotionBasis.THIRD_TERM_ONLY
+    )
+    cumulative_method = models.CharField(
+        max_length=25,
+        choices=CumulativeMethod.choices,
+        default=CumulativeMethod.SIMPLE_AVERAGE,
+        help_text=(
+            "Only relevant when promotion_basis is CUMULATIVE_ALL_TERMS. "
+            "RECURSIVE_BROUGHT_FORWARD matches a real school's actual "
+            "computation (Elon College): each new term's score is "
+            "averaged with the running cumulative from before it, which "
+            "mathematically weights the most recent term more heavily "
+            "than a flat average across all terms would. The actual "
+            "computation is implemented in the Examinations phase, once "
+            "real term-by-term scores exist to combine - this field only "
+            "records the CHOICE."
+        ),
     )
     gatekeeper_pass_mark_mode = models.CharField(
         max_length=20,
