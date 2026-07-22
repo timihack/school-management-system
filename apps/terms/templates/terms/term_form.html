@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg">
+  <h1 class="text-xl font-semibold text-slate-800 mb-1">
+    {% if term %}Edit Term{% else %}Add Term{% endif %}
+  </h1>
+  <p class="text-sm text-slate-500 mb-4">{{ session.name }}</p>
+
+  <form method="post" class="space-y-4 bg-white border border-slate-200 rounded-xl p-6">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <p class="text-xs text-red-600">{{ form.non_field_errors.0 }}</p>
+    {% endif %}
+    {% for field in form %}
+    <div>
+      <label class="block text-sm font-medium text-slate-600 mb-1">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+      <p class="text-xs text-red-600 mt-1">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit"
+      class="w-full bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-indigo-700">
+      Save
+    </button>
+  </form>
+</div>
+{% endblock %}

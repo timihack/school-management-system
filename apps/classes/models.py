@@ -138,13 +138,13 @@ class ClassEnrollment(TimestampedModel):
     # reasoning as class_level below: losing which SESSION an enrollment
     # belonged to is a comparably serious data loss, not one to silently
     # null out.
-    # academic_session = models.ForeignKey(
-    #     "terms.AcademicSession",
-    #     on_delete=models.PROTECT,
-    #     null=True,
-    #     blank=True,
-    #     related_name="class_enrollments",
-    # )
+    academic_session = models.ForeignKey(
+        "terms.AcademicSession",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="class_enrollments",
+    )
     # PROTECT, not SET_NULL: losing which class a student was in during
     # a past term is a more serious data loss than an unassigned
     # department (Phase 7) - deleting a ClassLevel that has ANY

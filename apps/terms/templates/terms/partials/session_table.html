@@ -1,0 +1,46 @@
+<table class="w-full text-sm">
+  <thead>
+    <tr class="text-left text-slate-500 border-b border-slate-200">
+      <th class="py-2 pr-4">Session</th>
+      <th class="py-2 pr-4">Start</th>
+      <th class="py-2 pr-4">End</th>
+      <th class="py-2 pr-4"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for session in page_obj %}
+    <tr class="border-b border-slate-100">
+      <td class="py-2 pr-4">
+        <a href="{% url 'terms:session_detail' session.pk %}" class="text-indigo-600 hover:underline">
+          {{ session.name }}
+        </a>
+      </td>
+      <td class="py-2 pr-4">{{ session.start_date }}</td>
+      <td class="py-2 pr-4">{{ session.end_date }}</td>
+      <td class="py-2 pr-4">
+        <a href="{% url 'terms:session_detail' session.pk %}" class="text-indigo-600 hover:underline">View</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="py-4 text-slate-400 text-center">No sessions found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="flex justify-between items-center mt-4 text-sm text-slate-500">
+  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}
+    <a hx-get="{% url 'terms:session_list' %}?page={{ page_obj.previous_page_number }}&search={{ filters.search }}"
+       hx-target="#session-table-container"
+       href="?page={{ page_obj.previous_page_number }}"
+       class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Previous</a>
+    {% endif %}
+    {% if page_obj.has_next %}
+    <a hx-get="{% url 'terms:session_list' %}?page={{ page_obj.next_page_number }}&search={{ filters.search }}"
+       hx-target="#session-table-container"
+       href="?page={{ page_obj.next_page_number }}"
+       class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Next</a>
+    {% endif %}
+  </div>
+</div>
