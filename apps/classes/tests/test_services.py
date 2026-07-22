@@ -72,3 +72,58 @@ class TestAssignStudentToClass:
         )
 
         assert enrollment.is_repeat is True
+
+
+@pytest.mark.django_db
+class TestAssignStudentToClassSessionAutoPopulation:
+    """
+    Covers the Phase 10 retrofit: academic_session defaults to whatever
+    apps.terms.selectors.get_current_session() returns, unless an
+    explicit one is passed. This is the actual proof that the deferred
+    FK added in Phase 10 does something, not just that the column
+    exists.
+    """
+
+    def test_defaults_to_the_current_session_when_one_is_active(self):
+        from apps.terms.services import activate_term
+        from apps.terms.tests.factories import TermFactory
+
+        term = TermFactory()
+        activate_term(term)
+        student = StudentFactory()
+        arm = ClassArmFactory()
+
+        enrollment = assign_student_to_class(
+            student=student, class_level=arm.class_level, class_arm=arm
+        )
+
+        assert enrollment.academic_session == term.academic_session
+
+    def test_is_none_when_no_session_is_current(self):
+        student = StudentFactory()
+        arm = ClassArmFactory()
+
+        enrollment = assign_student_to_class(
+            student=student, class_level=arm.class_level, class_arm=arm
+        )
+
+        assert enrollment.academic_session is None
+
+    def test_explicit_academic_session_overrides_the_current_one(self):
+        from apps.terms.services import activate_term
+        from apps.terms.tests.factories import AcademicSessionFactory, TermFactory
+
+        current_term = TermFactory()
+        activate_term(current_term)
+        other_session = AcademicSessionFactory(name="1999/2000")
+        student = StudentFactory()
+        arm = ClassArmFactory()
+
+        enrollment = assign_student_to_class(
+            student=student,
+            class_level=arm.class_level,
+            class_arm=arm,
+            academic_session=other_session,
+        )
+
+        assert enrollment.academic_session == other_session

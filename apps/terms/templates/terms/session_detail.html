@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl space-y-6">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-xl font-semibold text-slate-800">{{ session.name }}</h1>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
+      <div><dt class="text-slate-500">Start Date</dt><dd>{{ session.start_date }}</dd></div>
+      <div><dt class="text-slate-500">End Date</dt><dd>{{ session.end_date }}</dd></div>
+    </dl>
+
+    {% if request.user.role == "ADMIN" %}
+    <div class="mt-4 flex gap-3">
+      <a href="{% url 'terms:session_update' session.pk %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+      <form method="post" action="{% url 'terms:session_delete' session.pk %}"
+            onsubmit="return confirm('Delete {{ session.name }}? This is blocked if any student has enrollment history in this session.');">
+        {% csrf_token %}
+        <button type="submit" class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+          Delete
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-slate-800">Terms</h2>
+      {% if request.user.role == "ADMIN" %}
+      <a href="{% url 'terms:term_create' session.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">+ Add Term</a>
+      {% endif %}
+    </div>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      {% for term in terms %}
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="font-medium text-slate-800">
+            {{ term.get_name_display }}
+            {% if term.is_current %}
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Current</span>
+            {% endif %}
+          </p>
+          <p class="text-xs text-slate-500">
+            {{ term.start_date }} - {{ term.end_date }}
+            {% if term.next_term_begins %} · Next term begins {{ term.next_term_begins }}{% endif %}
+            {% if term.total_school_days %} · {{ term.total_school_days }} school days{% endif %}
+          </p>
+        </div>
+        {% if request.user.role == "ADMIN" %}
+        <div class="flex gap-3 text-xs">
+          {% if not term.is_current %}
+          <form method="post" action="{% url 'terms:term_activate' term.pk %}"
+                onsubmit="return confirm('Make {{ term }} the current term?');">
+            {% csrf_token %}
+            <button type="submit" class="text-emerald-600 hover:underline">Activate</button>
+          </form>
+          {% endif %}
+          <a href="{% url 'terms:term_update' term.pk %}" class="text-indigo-600 hover:underline">Edit</a>
+          <form method="post" action="{% url 'terms:term_delete' term.pk %}"
+                onsubmit="return confirm('Delete {{ term }}?');">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400">No terms created yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

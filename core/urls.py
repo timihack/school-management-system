@@ -11,6 +11,6 @@ urlpatterns = [
     path("staff/", include("apps.staff.urls")),
     path("classes/", include("apps.classes.urls")),
     path("subjects/", include("apps.subjects.urls")),
-    # path("terms/", include("apps.terms.urls")),
+    path("terms/", include("apps.terms.urls")),
     path("", include("apps.dashboard.urls")),
 ]

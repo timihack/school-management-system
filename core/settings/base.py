@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "apps.staff",
     "apps.classes",
     "apps.subjects",
-    # "apps.terms",
+    "apps.terms",
 
     # Third-party, security
     "axes",
@@ -77,7 +77,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # "core.context_processors.current_term",
+                "core.context_processors.current_term",
             ],
         },
     },
