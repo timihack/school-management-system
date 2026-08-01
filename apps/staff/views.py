@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
 from apps.accounts.models import User
+from core.permissions.checks import check_role_or_owner
 from core.permissions.mixins import RoleRequiredMixin
 
 from . import permissions, selectors, services
@@ -71,20 +71,24 @@ class StaffUpdateView(RoleRequiredMixin, View):
     case #1). allowed_roles broadens to admit STAFF at the role-gate
     level - but unlike Teacher, CAN_MANAGE_STAFF is ADMIN-only, so this
     broadening is the ONLY way a staff member reaches this view at all.
-    The object-level check below then restricts them to their own
-    record. Per the note left in docs/SECURITY.md after Phase 5: this is
-    still copy-paste, not yet a reusable mixin - that's worth doing once
-    a third case shows up.
+
+    Refactored in Phase 11 to call core.permissions.checks.check_role_or_owner
+    instead of its own inline "if not (is_manager or is_self): raise..." -
+    this was the shape that, once a THIRD case appeared (Attendance,
+    Phase 11: "only this arm's own class teacher, or Admin/Staff"),
+    triggered actually extracting it, per the note left in
+    docs/SECURITY.md after Phase 5.
     """
 
     allowed_roles = permissions.CAN_MANAGE_STAFF + [User.Role.STAFF]
 
     def _get_staff_or_403(self, request, pk) -> Staff:
         staff = get_object_or_404(Staff, pk=pk)
-        is_manager = request.user.role in permissions.CAN_MANAGE_STAFF
-        is_self = staff.user_id == request.user.id
-        if not (is_manager or is_self):
-            raise PermissionDenied("You can only edit your own profile.")
+        check_role_or_owner(
+            request=request,
+            allowed_roles=permissions.CAN_MANAGE_STAFF,
+            is_owner=(staff.user_id == request.user.id),
+        )
         return staff
 
     def get(self, request, pk):

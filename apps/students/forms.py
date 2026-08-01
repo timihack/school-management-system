@@ -77,9 +77,10 @@ class StudentUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Student
-        fields = ["gender", "phone_number", "address"]
+        fields = ["gender", "phone_number", "address", "photo"]
         widgets = {
             "gender": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "phone_number": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
             "address": forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3}),
+            "photo": forms.ClearableFileInput(attrs={"class": TAILWIND_INPUT}),
         }

@@ -1,26 +1,41 @@
 {% load static django_htmx %}
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<!--
+  x-data/x-init wire up dark mode via Alpine (already in our stack since
+  Phase 1) - checks localStorage first, falls back to OS preference,
+  and toggles the "dark" class Tailwind's dark: variant looks for.
+  localStorage is appropriate here: this is a real deployed site, not a
+  claude.ai artifact (the localStorage restriction elsewhere in this
+  system only applies to the sandboxed Artifacts/Visualizer environment).
+-->
+<html lang="en" class="h-full"
+      x-data="{ dark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
+      x-init="$watch('dark', value => { localStorage.setItem('theme', value ? 'dark' : 'light'); document.documentElement.classList.toggle('dark', value); }); document.documentElement.classList.toggle('dark', dark)">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}School Management System{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/dist/output.css' %}" />
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   {% htmx_script %}
 </head>
-<body class="h-full bg-slate-50 text-slate-800" hx-headers='{"x-csrftoken": "{{ csrf_token}}"}'>
+<body class="h-full bg-canvas dark:bg-canvas-dark text-slate-800 dark:text-slate-200 font-sans transition-colors"
+      hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
   <div class="flex h-full">
     {% include "partials/sidebar.html" %}
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
       {% include "partials/topbar.html" %}
       <main class="flex-1 p-6 overflow-y-auto">
         {% if messages %}
         <div class="mb-4 space-y-2">
           {% for message in messages %}
-          <div class="rounded-lg px-4 py-2 text-sm border
-                      {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border-emerald-200
-                      {% elif message.tags == 'error' %}bg-red-50 text-red-700 border-red-200
-                      {% else %}bg-slate-50 text-slate-700 border-slate-200{% endif %}">
+          <div class="rounded-lg px-4 py-2.5 text-sm border
+                      {% if message.tags == 'success' %}bg-pass-soft text-pass border-pass/20 dark:bg-pass/10 dark:text-emerald-300 dark:border-pass/30
+                      {% elif message.tags == 'error' %}bg-alert-soft text-alert border-alert/20 dark:bg-alert/10 dark:text-red-300 dark:border-alert/30
+                      {% else %}bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700{% endif %}">
             {{ message }}
           </div>
           {% endfor %}

@@ -1,0 +1,40 @@
+{% if roster %}
+<form method="post" action="{% url 'attendance:register' %}">
+  {% csrf_token %}
+  <input type="hidden" name="class_level" value="{{ selected_class_level.pk }}">
+  <input type="hidden" name="class_arm" value="{{ selected_class_arm.pk|default:'' }}">
+  <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+
+  <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-slate-500 border-b border-slate-200 bg-slate-50">
+          <th class="py-2 px-4">Student</th>
+          <th class="py-2 px-4">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in roster %}
+        <tr class="border-b border-slate-100">
+          <td class="py-2 px-4">{{ entry.student.user.get_full_name|default:entry.student.user.username }}</td>
+          <td class="py-2 px-4">
+            <select name="status_{{ entry.student.pk }}" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+              <option value="PRESENT" {% if entry.existing_record.status == "PRESENT" or not entry.existing_record %}selected{% endif %}>Present</option>
+              <option value="ABSENT" {% if entry.existing_record.status == "ABSENT" %}selected{% endif %}>Absent</option>
+              <option value="LATE" {% if entry.existing_record.status == "LATE" %}selected{% endif %}>Late</option>
+              <option value="EXCUSED" {% if entry.existing_record.status == "EXCUSED" %}selected{% endif %}>Excused</option>
+            </select>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <button type="submit" class="mt-4 bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-indigo-700">
+    Save Attendance
+  </button>
+</form>
+{% else %}
+<p class="text-slate-400 text-sm">No students currently enrolled in this class.</p>
+{% endif %}

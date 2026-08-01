@@ -49,6 +49,7 @@ class TestSubjectCreateView:
                 "name": "Mathematics",
                 "code": "MTH",
                 "assessment_type": "SCORE_BASED",
+                "computation_method": "SUM_COMPONENTS",
                 "class_levels": [level.pk],
                 "is_active": "on",
             },
