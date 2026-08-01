@@ -29,6 +29,7 @@ class ClassLevelForm(forms.ModelForm):
             "assessment_type",
             "promotes_to",
             "exit_requires_arm_placement",
+            "class_teacher",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
@@ -38,6 +39,7 @@ class ClassLevelForm(forms.ModelForm):
             "assessment_type": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "promotes_to": forms.Select(attrs={"class": TAILWIND_INPUT}),
             "exit_requires_arm_placement": forms.CheckboxInput(attrs={"class": TAILWIND_CHECKBOX}),
+            "class_teacher": forms.Select(attrs={"class": TAILWIND_INPUT}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +49,12 @@ class ClassLevelForm(forms.ModelForm):
         # already exists (on create there's no self to exclude yet).
         if self.instance.pk:
             self.fields["promotes_to"].queryset = ClassLevel.objects.exclude(pk=self.instance.pk)
+
+        # Only meaningful for no-arm levels, but not hard-blocked here -
+        # same soft-rule reasoning as has_arms itself. Filtered to active
+        # teachers, matching ClassArmForm's own class_teacher field below.
+        self.fields["class_teacher"].required = False
+        self.fields["class_teacher"].queryset = Teacher.objects.filter(is_active=True)
 
 
 class ClassArmForm(forms.ModelForm):

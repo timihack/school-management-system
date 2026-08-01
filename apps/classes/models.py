@@ -75,6 +75,22 @@ class ClassLevel(TimestampedModel):
     # shape before real term results exist to place students against.
     exit_requires_arm_placement = models.BooleanField(default=False)
 
+    # Added after real usage surfaced a gap: ClassArm already has its own
+    # class_teacher, but a level with has_arms=False had NO equivalent
+    # concept at all - no way to designate a form/class teacher for it.
+    # Mirrors ClassArm.class_teacher exactly, at the level scope instead
+    # of the arm scope. ONLY meaningful when has_arms=False - nothing in
+    # the database enforces that today, same soft-rule reasoning as
+    # ClassArm's own docstring below.
+    class_teacher = models.ForeignKey(
+        "teachers.Teacher",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="class_levels_taught",
+        help_text="Only meaningful when this level has NO arms (has_arms=False).",
+    )
+
     class Meta:
         ordering = ["order"]
 

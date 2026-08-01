@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-xl font-semibold text-slate-800 mb-4">Attendance Register</h1>
+
+<!--
+  #attendance-filters wraps EVERYTHING - the level/date controls below
+  AND the swapped picker_and_roster block (which contains the arm
+  select once a level with arms is chosen) - so hx-include="#attendance-filters"
+  always captures all three values (level, arm, date) regardless of
+  which control triggered the request. This is a plain div, NOT a
+  <form>: the roster partial nested inside contains its OWN <form> for
+  the Save Attendance submission, and forms cannot validly nest.
+-->
+<div id="attendance-filters">
+  <div class="flex gap-3 mb-4">
+    <select name="class_level"
+            class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            hx-get="{% url 'attendance:register' %}"
+            hx-target="#picker-and-roster"
+            hx-trigger="change"
+            hx-include="#attendance-filters">
+      <option value="">Select a class...</option>
+      {% for level in all_levels %}
+      <option value="{{ level.pk }}" {% if selected_class_level.pk == level.pk %}selected{% endif %}>
+        {{ level.name }}{% if not level.has_arms %} (no arms){% endif %}
+      </option>
+      {% endfor %}
+    </select>
+    <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"
+           class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+           hx-get="{% url 'attendance:register' %}"
+           hx-target="#picker-and-roster"
+           hx-trigger="change"
+           hx-include="#attendance-filters">
+  </div>
+
+  <div id="picker-and-roster">
+    {% include "attendance/partials/picker_and_roster.html" %}
+  </div>
+</div>
+{% endblock %}

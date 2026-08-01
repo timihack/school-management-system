@@ -3,7 +3,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
+from apps.attendance import selectors as attendance_selectors
 from apps.classes import selectors as class_selectors
+from apps.terms.selectors import get_current_term
 from core.permissions.mixins import RoleRequiredMixin
 
 from . import permissions, selectors, services
@@ -65,6 +67,14 @@ class StudentDetailView(RoleRequiredMixin, View):
         student = get_object_or_404(selectors.get_student_list(), pk=pk)
         guardianships = student.guardianships.select_related("parent__user")
         current_enrollment = class_selectors.get_current_enrollment(student)
+
+        attendance_summary = None
+        current_term = get_current_term()
+        if current_term:
+            attendance_summary = attendance_selectors.get_attendance_summary_for_student(
+                student, current_term
+            )
+
         return render(
             request,
             "students/student_detail.html",
@@ -72,6 +82,7 @@ class StudentDetailView(RoleRequiredMixin, View):
                 "student": student,
                 "guardianships": guardianships,
                 "current_enrollment": current_enrollment,
+                "attendance_summary": attendance_summary,
             },
         )
 
@@ -86,7 +97,7 @@ class StudentUpdateView(RoleRequiredMixin, View):
 
     def post(self, request, pk):
         student = get_object_or_404(Student, pk=pk)
-        form = StudentUpdateForm(request.POST, instance=student)
+        form = StudentUpdateForm(request.POST, request.FILES, instance=student)
         if not form.is_valid():
             return render(
                 request, "students/student_form.html", {"form": form, "student": student}

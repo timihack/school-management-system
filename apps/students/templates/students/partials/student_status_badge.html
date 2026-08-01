@@ -1,5 +1,5 @@
 <span id="status-badge-{{ student.pk }}"
-      class="px-2 py-1 rounded-full text-xs font-medium
-             {% if student.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+      class="px-2.5 py-1 rounded-full text-xs font-medium
+             {% if student.is_active %}bg-pass-soft text-pass dark:bg-pass/15 dark:text-emerald-300{% else %}bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400{% endif %}">
   {% if student.is_active %}Active{% else %}Inactive{% endif %}
 </span>

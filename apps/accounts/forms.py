@@ -12,8 +12,9 @@ class StyledAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         field_classes = (
-            "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm "
-            "focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            "w-full rounded-lg border border-slate-300 dark:border-slate-700 "
+            "dark:bg-slate-800 dark:text-slate-200 px-3 py-2 text-sm "
+            "focus:outline-none focus:ring-2 focus:ring-ink-600"
         )
         self.fields["username"].widget.attrs.update(
             {"class": field_classes, "placeholder": "Username", "autofocus": True}
@@ -21,4 +22,3 @@ class StyledAuthenticationForm(AuthenticationForm):
         self.fields["password"].widget.attrs.update(
             {"class": field_classes, "placeholder": "Password"}
         )
- 

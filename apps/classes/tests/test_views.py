@@ -58,6 +58,31 @@ class TestClassLevelCreateView:
 
         assert response.status_code == 403
 
+    def test_class_teacher_can_be_set_for_a_no_arm_level(self, client):
+        from apps.teachers.tests.factories import TeacherFactory
+
+        admin = UserFactory(username="admin_cl5", password="pass12345", role=User.Role.ADMIN)
+        client.force_login(admin)
+        teacher = TeacherFactory()
+
+        response = client.post(
+            reverse("classes:create"),
+            {
+                "name": "Creche",
+                "category": "CRECHE",
+                "order": 1,
+                "has_arms": "",
+                "assessment_type": "SKILL_BASED",
+                "promotes_to": "",
+                "exit_requires_arm_placement": "",
+                "class_teacher": teacher.pk,
+            },
+        )
+
+        assert response.status_code == 302
+        level = ClassLevel.objects.get(name="Creche")
+        assert level.class_teacher == teacher
+
 
 @pytest.mark.django_db
 class TestClassEnrollmentView:

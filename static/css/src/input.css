@@ -1,1 +1,68 @@
 @import "tailwindcss";
+
+/*
+  Design system tokens for the Enterprise School Management System.
+  Tailwind v4's @theme directive turns each of these into both a CSS
+  variable AND a generated utility class (e.g. --color-ink below
+  produces bg-ink, text-ink, border-ink automatically) - no separate
+  tailwind.config.js needed, per v4's CSS-native theming approach.
+
+  See docs/DESIGN_SYSTEM.md for the full rationale behind this specific
+  palette/type choice - it is NOT a generic Tailwind-admin-dashboard
+  default; every value here was chosen deliberately for this subject
+  (Nigerian school administration - WAEC grading, JSS/SSS structure)
+  rather than picked from a template.
+*/
+@theme {
+  /* Primary/brand - deep academic navy, not generic SaaS indigo */
+  --color-ink-50: #eef1f8;
+  --color-ink-100: #d7ddef;
+  --color-ink-600: #2c3a6e;
+  --color-ink-700: #1E2A5E;
+  --color-ink-800: #16204a;
+  --color-ink-900: #101838;
+
+  /* Background - cool neutral, deliberately NOT warm cream */
+  --color-canvas: #F7F8FA;
+  --color-canvas-dark: #0f1420;
+
+  /* Signature accent - spent in exactly ONE place: top-grade/#1-position
+     "medallion" badges. Never used decoratively elsewhere. */
+  --color-seal-gold: #A8791A;
+  --color-seal-gold-soft: #F5EBD3;
+
+  /* Status meaning ONLY - never decorative */
+  --color-pass: #166534;
+  --color-pass-soft: #DCFCE7;
+  --color-alert: #991B1B;
+  --color-alert-soft: #FEE2E2;
+  --color-pending: #B45309;
+  --color-pending-soft: #FEF3C7;
+
+  /* Type */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Tabular figures for score/grade/position columns - a considered
+   detail for a grading-heavy app: numbers align like a real ledger
+   rather than wobbling proportionally. Applied via a utility class
+   rather than globally, since it should only apply to genuinely
+   numeric/tabular data, not all text. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signature element: the gold medallion treatment for top-grade/#1
+   badges. Deliberately distinct from the flat status pills used
+   everywhere else - reserved for genuinely earned top results only. */
+.badge-medallion {
+  background-color: var(--color-seal-gold-soft);
+  color: var(--color-seal-gold);
+  border: 1.5px solid var(--color-seal-gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-seal-gold) 15%, transparent);
+}
+
+.dark .badge-medallion {
+  background-color: color-mix(in srgb, var(--color-seal-gold) 20%, transparent);
+}

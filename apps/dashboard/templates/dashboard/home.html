@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex items-center justify-center h-full">
-  <div class="text-center">
-    <h1 class="text-3xl font-semibold text-slate-800">
-      Enterprise School Management System
-    </h1>
-    <p class="mt-2 text-slate-500">Phase 1: Foundation is live.</p>
-  </div>
+<div class="max-w-2xl">
+  <h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white mb-2">
+    Welcome{% if request.user.get_full_name %}, {{ request.user.get_full_name }}{% endif %}
+  </h1>
+  <p class="text-sm text-slate-500 dark:text-slate-400">
+    Foundation is live. Use the sidebar to get to Students, Classes, Attendance, and everything else.
+  </p>
 </div>
 {% endblock %}

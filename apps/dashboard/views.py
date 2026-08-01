@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 
 from apps.accounts.models import User
+from apps.attendance import selectors as attendance_selectors
 from apps.parents import selectors as parent_selectors
 from apps.parents.models import Parent
+from apps.terms.selectors import get_current_term
 from core.permissions.decorators import role_required
 from core.permissions.mixins import RoleRequiredMixin
 
@@ -19,8 +21,24 @@ def home(request):
     if request.user.role == User.Role.PARENT:
         parent = Parent.objects.filter(user=request.user).first()
         children = parent_selectors.get_children_for_parent(parent) if parent else []
+
+        current_term = get_current_term()
+        children_with_attendance = [
+            {
+                "student": child,
+                "attendance_summary": (
+                    attendance_selectors.get_attendance_summary_for_student(child, current_term)
+                    if current_term
+                    else None
+                ),
+            }
+            for child in children
+        ]
+
         return render(
-            request, "dashboard/parent_home.html", {"parent": parent, "children": children}
+            request,
+            "dashboard/parent_home.html",
+            {"parent": parent, "children_with_attendance": children_with_attendance},
         )
 
     return render(request, "dashboard/home.html")

@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
 from apps.accounts.models import User
+from core.permissions.checks import check_role_or_owner
 from core.permissions.mixins import RoleRequiredMixin
 
 from . import permissions, selectors, services
@@ -69,27 +69,28 @@ class TeacherUpdateView(RoleRequiredMixin, View):
     """
     Role-gated to Admin/Staff/Teacher - broader than CAN_MANAGE_TEACHERS
     on purpose, because a Teacher IS allowed here, just not for just
-    anyone's record. This is the project's first OBJECT-level check:
-    RoleRequiredMixin proves "you're some kind of Teacher/Staff/Admin,"
-    but only _get_teacher_or_403() below proves "you're allowed to touch
-    THIS SPECIFIC Teacher row." A Staff/Admin can edit anyone; a Teacher
-    can only edit themselves - the two checks answer genuinely different
-    questions and this view uses both.
+    anyone's record. RoleRequiredMixin proves "you're some kind of
+    Teacher/Staff/Admin," but only _get_teacher_or_403() below proves
+    "you're allowed to touch THIS SPECIFIC Teacher row." A Staff/Admin
+    can edit anyone; a Teacher can only edit themselves.
 
-    This closes the object-level-permissions gap in docs/SECURITY.md for
-    ONE case, not generally - a reusable OwnerOrRoleRequiredMixin is
-    worth building once a second or third case exists to design it
-    against, same reasoning as the deferred Teacher/Staff base model.
+    Refactored in Phase 11 to call core.permissions.checks.check_role_or_owner
+    instead of its own inline "if not (is_manager or is_self): raise..."
+    - this was the SECOND occurrence of that shape (Staff's own self-edit
+    view has the identical pattern); the THIRD occurrence (Attendance,
+    Phase 11) is what actually triggered extracting it, per the note
+    left in docs/SECURITY.md after Phase 6.
     """
 
     allowed_roles = permissions.CAN_MANAGE_TEACHERS + [User.Role.TEACHER]
 
     def _get_teacher_or_403(self, request, pk) -> Teacher:
         teacher = get_object_or_404(Teacher, pk=pk)
-        is_manager = request.user.role in permissions.CAN_MANAGE_TEACHERS
-        is_self = teacher.user_id == request.user.id
-        if not (is_manager or is_self):
-            raise PermissionDenied("You can only edit your own profile.")
+        check_role_or_owner(
+            request=request,
+            allowed_roles=permissions.CAN_MANAGE_TEACHERS,
+            is_owner=(teacher.user_id == request.user.id),
+        )
         return teacher
 
     def get(self, request, pk):

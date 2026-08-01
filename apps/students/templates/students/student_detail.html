@@ -2,40 +2,53 @@
 
 {% block content %}
 <div class="max-w-2xl">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold text-slate-800">
-      {{ student.user.get_full_name|default:student.user.username }}
-    </h1>
-    {% include "students/partials/student_status_badge.html" %}
+  <div class="flex items-center gap-4 mb-5">
+    {% if student.photo %}
+    <img src="{{ student.photo.url }}" alt=""
+         class="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm">
+    {% else %}
+    <div class="w-16 h-16 rounded-full bg-ink-50 dark:bg-white/10 flex items-center justify-center text-ink-700 dark:text-ink-100 text-xl font-display font-semibold">
+      {{ student.user.get_full_name|default:student.user.username|slice:":1"|upper }}
+    </div>
+    {% endif %}
+    <div class="flex-1">
+      <div class="flex items-center gap-3">
+        <h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white">
+          {{ student.user.get_full_name|default:student.user.username }}
+        </h1>
+        {% include "students/partials/student_status_badge.html" %}
+      </div>
+      <p class="text-sm text-slate-500 dark:text-slate-400">{{ student.admission_number }}</p>
+    </div>
   </div>
 
-  <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
-    <div><dt class="text-slate-500">Admission Number</dt><dd>{{ student.admission_number }}</dd></div>
-    <div><dt class="text-slate-500">Date of Birth</dt><dd>{{ student.date_of_birth }}</dd></div>
-    <div><dt class="text-slate-500">Gender</dt><dd>{{ student.get_gender_display }}</dd></div>
-    <div><dt class="text-slate-500">Admission Date</dt><dd>{{ student.admission_date }}</dd></div>
-    <div><dt class="text-slate-500">Phone</dt><dd>{{ student.phone_number|default:"—" }}</dd></div>
-    <div><dt class="text-slate-500">Email</dt><dd>{{ student.user.email }}</dd></div>
-    <div class="col-span-2"><dt class="text-slate-500">Address</dt><dd>{{ student.address|default:"—" }}</dd></div>
+  <dl class="grid grid-cols-2 gap-4 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+    <div><dt class="text-slate-500 dark:text-slate-400">Admission Number</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.admission_number }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Date of Birth</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.date_of_birth }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Gender</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.get_gender_display }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Admission Date</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.admission_date }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Phone</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.phone_number|default:"—" }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Email</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.user.email }}</dd></div>
+    <div class="col-span-2"><dt class="text-slate-500 dark:text-slate-400">Address</dt><dd class="text-slate-800 dark:text-slate-200">{{ student.address|default:"—" }}</dd></div>
   </dl>
 
   <div class="mt-6">
-    <h2 class="text-lg font-semibold text-slate-800 mb-3">Current Class</h2>
-    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-ink-700 dark:text-white mb-3">Current Class</h2>
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
       {% if current_enrollment %}
       <div>
-        <a href="{% url 'classes:detail' current_enrollment.class_level.pk %}" class="font-medium text-indigo-600 hover:underline">
+        <a href="{% url 'classes:detail' current_enrollment.class_level.pk %}" class="font-medium text-ink-700 dark:text-ink-100 hover:underline">
           {{ current_enrollment.class_level.name }}{% if current_enrollment.class_arm %} {{ current_enrollment.class_arm.name }}{% endif %}
         </a>
         {% if current_enrollment.is_repeat %}
-        <span class="ml-2 text-xs text-amber-600">(Repeat)</span>
+        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-pending-soft text-pending">Repeat</span>
         {% endif %}
       </div>
       {% else %}
-      <p class="text-sm text-slate-400">Not yet assigned to a class.</p>
+      <p class="text-sm text-slate-400 dark:text-slate-500">Not yet assigned to a class.</p>
       {% endif %}
       {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
-      <a href="{% url 'classes:enroll_student' student.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">
+      <a href="{% url 'classes:enroll_student' student.pk %}" class="text-sm font-medium text-ink-700 dark:text-ink-100 hover:underline">
         {% if current_enrollment %}Change Class{% else %}Assign to Class{% endif %}
       </a>
       {% endif %}
@@ -43,21 +56,38 @@
   </div>
 
   <div class="mt-6">
-    <h2 class="text-lg font-semibold text-slate-800 mb-3">Guardians</h2>
-    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+    <h2 class="text-lg font-semibold text-ink-700 dark:text-white mb-3">Attendance This Term</h2>
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+      {% if attendance_summary %}
+      <p class="text-slate-800 dark:text-slate-200 tabular-nums">
+        <span class="font-semibold">{{ attendance_summary.days_absent }}</span> day{{ attendance_summary.days_absent|pluralize }} absent
+        out of <span class="font-semibold">{{ attendance_summary.total_school_days|default:"—" }}</span> school days.
+      </p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 tabular-nums">
+        Present: {{ attendance_summary.days_present }} · Late: {{ attendance_summary.days_late }} · Excused: {{ attendance_summary.days_excused }}
+      </p>
+      {% else %}
+      <p class="text-sm text-slate-400 dark:text-slate-500">No active term - attendance can't be summarized yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-lg font-semibold text-ink-700 dark:text-white mb-3">Guardians</h2>
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 shadow-sm">
       {% for guardianship in guardianships %}
       <div class="p-4">
         <a href="{% url 'parents:detail' guardianship.parent.pk %}"
-           class="font-medium text-indigo-600 hover:underline">
+           class="font-medium text-ink-700 dark:text-ink-100 hover:underline">
           {{ guardianship.parent.user.get_full_name|default:guardianship.parent.user.username }}
         </a>
-        <p class="text-xs text-slate-500">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
           {{ guardianship.get_relationship_display }}
           {% if guardianship.is_primary_contact %} · Primary contact{% endif %}
         </p>
       </div>
       {% empty %}
-      <p class="p-4 text-sm text-slate-400">No guardians linked yet.</p>
+      <p class="p-4 text-sm text-slate-400 dark:text-slate-500">No guardians linked yet.</p>
       {% endfor %}
     </div>
   </div>
@@ -65,13 +95,13 @@
   {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
   <div class="mt-4 flex gap-3">
     <a href="{% url 'students:update' student.pk %}"
-       class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+       class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Edit</a>
     {% if request.user.role == "ADMIN" and student.is_active %}
     <button hx-post="{% url 'students:deactivate' student.pk %}"
             hx-target="#status-badge-{{ student.pk }}"
             hx-swap="outerHTML"
             hx-confirm="Deactivate {{ student.user.get_full_name }}? They will no longer be able to log in."
-            class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+            class="px-4 py-2 rounded-lg bg-alert-soft text-alert text-sm hover:bg-red-100 dark:bg-alert/10 dark:hover:bg-alert/20 transition-colors">
       Deactivate
     </button>
     {% endif %}

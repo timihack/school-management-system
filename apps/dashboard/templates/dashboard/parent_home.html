@@ -1,23 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-xl font-semibold text-slate-800 mb-4">My Children</h1>
+<h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white mb-5">My Children</h1>
 
 {% if not parent %}
-<p class="text-slate-500">
+<p class="text-slate-500 dark:text-slate-400">
   Your account isn't linked to a parent profile yet. Please contact the school office.
 </p>
-{% elif not children %}
-<p class="text-slate-500">No children are linked to your account yet.</p>
+{% elif not children_with_attendance %}
+<p class="text-slate-500 dark:text-slate-400">No children are linked to your account yet.</p>
 {% else %}
 <div class="grid gap-4 sm:grid-cols-2">
-  {% for child in children %}
-  <div class="bg-white border border-slate-200 rounded-xl p-4">
-    <p class="font-medium text-slate-800">
-      {{ child.user.get_full_name|default:child.user.username }}
-    </p>
-    <p class="text-sm text-slate-500">Admission No. {{ child.admission_number }}</p>
-    <p class="text-sm text-slate-500">{{ child.get_gender_display }}</p>
+  {% for entry in children_with_attendance %}
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex gap-3">
+    {% if entry.student.photo %}
+    <img src="{{ entry.student.photo.url }}" alt="" class="w-12 h-12 rounded-full object-cover shrink-0">
+    {% else %}
+    <div class="w-12 h-12 rounded-full bg-ink-50 dark:bg-white/10 flex items-center justify-center text-ink-700 dark:text-ink-100 font-display font-semibold shrink-0">
+      {{ entry.student.user.get_full_name|default:entry.student.user.username|slice:":1"|upper }}
+    </div>
+    {% endif %}
+    <div>
+      <p class="font-medium text-slate-800 dark:text-slate-100">
+        {{ entry.student.user.get_full_name|default:entry.student.user.username }}
+      </p>
+      <p class="text-sm text-slate-500 dark:text-slate-400">Admission No. {{ entry.student.admission_number }}</p>
+      <p class="text-sm text-slate-500 dark:text-slate-400">{{ entry.student.get_gender_display }}</p>
+      {% if entry.attendance_summary %}
+      <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 tabular-nums">
+        {{ entry.attendance_summary.days_absent }} day{{ entry.attendance_summary.days_absent|pluralize }} absent
+        out of {{ entry.attendance_summary.total_school_days|default:"—" }} school days this term
+      </p>
+      {% endif %}
+    </div>
   </div>
   {% endfor %}
 </div>

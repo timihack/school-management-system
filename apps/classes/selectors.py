@@ -40,7 +40,40 @@ def get_repeat_count(student, class_level: ClassLevel) -> int:
     ).count()
 
 
-def get_current_students_in_arm(class_arm: ClassArm) -> QuerySet[ClassEnrollment]:
-    return ClassEnrollment.objects.filter(class_arm=class_arm, is_current=True).select_related(
-        "student__user"
-    )
+def get_current_students_in_arm(class_arm: ClassArm) -> QuerySet:
+    """
+    Returns the actual Student queryset for whoever is currently
+    enrolled in this arm.
+
+    CORRECTED in the Attendance no-arm-support patch: this previously
+    returned the ClassEnrollment rows themselves (QuerySet[ClassEnrollment])
+    despite its name promising Students - the one real caller
+    (apps.attendance) treated each row's .pk as if it were the STUDENT's
+    pk, when it was actually the ClassEnrollment row's own pk. That's
+    exactly the kind of bug that only surfaces once something depends on
+    the return type meaning what its name says - fixed here at the
+    source rather than patched around in the caller.
+    """
+    from apps.students.models import Student
+
+    student_ids = ClassEnrollment.objects.filter(
+        class_arm=class_arm, is_current=True
+    ).values_list("student_id", flat=True)
+    return Student.objects.filter(pk__in=student_ids).select_related("user")
+
+
+def get_current_students_in_level(class_level: ClassLevel) -> QuerySet:
+    """
+    The no-arm equivalent of get_current_students_in_arm: students
+    currently enrolled DIRECTLY at this level (class_arm is NULL on
+    their enrollment) - this is the roster for a level where
+    has_arms=False, mirroring exactly how ClassEnrollment itself already
+    represents "enrolled at a level with no arm" as class_arm=None
+    rather than some fabricated placeholder arm.
+    """
+    from apps.students.models import Student
+
+    student_ids = ClassEnrollment.objects.filter(
+        class_level=class_level, class_arm__isnull=True, is_current=True
+    ).values_list("student_id", flat=True)
+    return Student.objects.filter(pk__in=student_ids).select_related("user")

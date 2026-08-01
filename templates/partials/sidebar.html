@@ -1,57 +1,84 @@
-<aside class="w-64 bg-white border-r border-slate-200 flex flex-col">
-  <div class="px-6 py-5 text-lg font-bold text-indigo-600">
-    School<span class="text-slate-800">MS</span>
+<!--
+  Ink navy surface - stays consistent across light/dark mode (a deep
+  navy already reads correctly in both, so this is one of the few
+  surfaces that doesn't need a dark: variant pair). Active section is
+  highlighted via request.resolver_match.app_name, available from
+  Django's built-in request context processor - no custom middleware
+  needed.
+-->
+<aside class="w-64 bg-ink-700 flex flex-col shrink-0">
+  <div class="px-6 py-6">
+    <span class="font-display text-xl font-semibold text-white tracking-tight">
+      School<span class="text-seal-gold">MS</span>
+    </span>
   </div>
-  <nav class="flex-1 px-3 space-y-1">
-    <a href="{% url 'dashboard:home' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+  <nav class="flex-1 px-3 space-y-0.5 overflow-y-auto">
+    {% url 'dashboard:home' as dashboard_url %}
+    <a href="{{ dashboard_url }}"
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.path == dashboard_url %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Dashboard
     </a>
     {% if request.user.role == "ADMIN" or request.user.role == "STAFF" or request.user.role == "TEACHER" %}
     <a href="{% url 'students:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "students" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Students
     </a>
     <a href="{% url 'parents:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "parents" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Parents
     </a>
     <a href="{% url 'departments:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "departments" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Departments
     </a>
     <a href="{% url 'classes:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "classes" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Classes
     </a>
     <a href="{% url 'subjects:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "subjects" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Subjects
     </a>
     <a href="{% url 'terms:session_list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
-      Sessions & Terms
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "terms" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
+      Sessions &amp; Terms
+    </a>
+    <a href="{% url 'attendance:register' %}"
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "attendance" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
+      Attendance
     </a>
     <a href="{% url 'teachers:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "teachers" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Teachers
     </a>
     {% endif %}
     {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
     <a href="{% url 'staff:list' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.resolver_match.app_name == "staff" %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Staff
     </a>
     {% endif %}
     {% if request.user.role == "ADMIN" %}
     <a href="{% url 'dashboard:admin_area' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.path == '/admin-area/' %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Admin Area
     </a>
     {% endif %}
     {% if request.user.role == "ADMIN" or request.user.role == "STAFF" %}
     <a href="{% url 'dashboard:reports_preview' %}"
-       class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">
+       class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              {% if request.path == '/reports-preview/' %}bg-white/10 text-white{% else %}text-ink-100 hover:bg-white/5 hover:text-white{% endif %}">
       Reports
     </a>
     {% endif %}

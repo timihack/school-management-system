@@ -1,0 +1,25 @@
+{% if selected_class_level and selected_class_level.has_arms %}
+<div class="mb-4">
+  <select name="class_arm"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          hx-get="{% url 'attendance:register' %}"
+          hx-target="#picker-and-roster"
+          hx-trigger="change"
+          hx-include="#attendance-filters">
+    <option value="">Select an arm...</option>
+    {% for arm in arms_for_level %}
+    <option value="{{ arm.pk }}" {% if selected_class_arm.pk == arm.pk %}selected{% endif %}>
+      {{ arm.name }}
+    </option>
+    {% endfor %}
+  </select>
+</div>
+{% endif %}
+
+{% if needs_arm_selection %}
+<p class="text-slate-400 text-sm">This class has arms - select one to continue.</p>
+{% elif not selected_class_level %}
+<p class="text-slate-400 text-sm">Select a class to take or view attendance.</p>
+{% else %}
+{% include "attendance/partials/roster_table.html" %}
+{% endif %}

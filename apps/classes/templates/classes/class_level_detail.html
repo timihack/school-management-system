@@ -96,6 +96,18 @@
       {% endfor %}
     </div>
   </div>
+  {% else %}
+  <div>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Class Teacher</h2>
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <p class="text-slate-800">
+        {{ class_level.class_teacher.user.get_full_name|default:"Not assigned" }}
+      </p>
+      <p class="text-xs text-slate-500 mt-1">
+        This level has no arms, so it has one class teacher directly (edit above to assign one).
+      </p>
+    </div>
+  </div>
   {% endif %}
 </div>
 {% endblock %}
