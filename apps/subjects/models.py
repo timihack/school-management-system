@@ -221,3 +221,64 @@ class GradeBand(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.label} ({self.min_percentage}-{self.max_percentage}%)"
+
+
+class Topic(TimestampedModel):
+    """
+    One syllabus item within a Subject's curriculum, scoped to a
+    specific ClassLevel (e.g. "Fractions" under Mathematics, JSS1).
+    Deliberately NOT a new Django app - reuses Subject, ClassLevel, and
+    Term rather than duplicating any relationship-modeling, the same
+    reasoning that kept GradingScale/GradeBand inside apps.subjects
+    instead of spinning up a separate app for them.
+
+    class_level is REQUIRED (unlike term) because a topic's syllabus
+    placement is level-specific by definition - "Fractions" as taught
+    in JSS1 is a genuinely different curriculum entry from "Fractions"
+    in JSS2, even under the same Subject. term is OPTIONAL (SET_NULL)
+    because not every school wants to pin a topic to a specific term
+    up front - some build out a level-wide syllabus first and schedule
+    it into terms later, or never, if they only track subject/level
+    granularity. SET_NULL (not CASCADE) so deleting a Term never
+    silently deletes curriculum content - it just un-schedules it.
+
+    Uses a STRING FK reference ("terms.Term") rather than a direct
+    import, per the project's established deferred cross-app FK
+    pattern (see docs/ARCHITECTURE_DECISIONS.md): apps.subjects (Phase
+    9) predates apps.terms (Phase 10) in the build order, so this keeps
+    the dependency direction honest even though both apps now exist by
+    the time this field is being added.
+
+    Curriculum management deliberately has BROADER RBAC than Subject
+    structural management itself (Admin+Staff+Teacher, vs. Subject's
+    Admin-only - see permissions.CAN_MANAGE_TOPICS) - confirmed by the
+    user as the foundation the future Timetable and AI curriculum-tutor
+    features will ground themselves against.
+    """
+
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="topics")
+    class_level = models.ForeignKey(
+        ClassLevel, on_delete=models.CASCADE, related_name="topics"
+    )
+    term = models.ForeignKey(
+        "terms.Term",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="topics",
+    )
+    name = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject", "class_level", "name"],
+                name="unique_topic_name_per_subject_level",
+            )
+        ]
+        ordering = ["class_level__order", "subject__name", "order"]
+
+    def __str__(self) -> str:
+        return f"{self.subject.name} - {self.name} ({self.class_level.name})"

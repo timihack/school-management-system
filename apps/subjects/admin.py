@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import AssessmentComponent, GradeBand, GradingScale, SkillChecklistItem, Subject
+from .models import (
+    AssessmentComponent,
+    GradeBand,
+    GradingScale,
+    SkillChecklistItem,
+    Subject,
+    Topic,
+)
 
 
 class AssessmentComponentInline(admin.TabularInline):
@@ -35,3 +42,10 @@ class GradeBandInline(admin.TabularInline):
 class GradeBandAdmin(admin.ModelAdmin):
     list_display = ("grading_scale", "label", "min_percentage", "max_percentage")
     list_filter = ("grading_scale",)
+
+
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ("name", "subject", "class_level", "term", "order")
+    list_filter = ("class_level", "subject", "term")
+    search_fields = ("name", "subject__name")
