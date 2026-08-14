@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import AssessmentComponent, GradeBand, SkillChecklistItem, Subject
+from .models import AssessmentComponent, GradeBand, SkillChecklistItem, Subject, Topic
 from .validators import validate_grade_band_does_not_overlap
 
 TAILWIND_INPUT = (
@@ -93,3 +93,44 @@ class GradeBandForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+
+class TopicForm(forms.ModelForm):
+    """
+    ONE form for both create and update, same convention as
+    AssessmentComponentForm/SkillChecklistItemForm - `subject` is set
+    from the URL's subject_pk in the view, not a form field (mirrors
+    AssessmentComponentCreateView's pattern exactly: component.subject
+    = subject before save()).
+
+    Takes `subject` via __init__ (not a form field) purely to scope the
+    class_level dropdown to levels this subject is actually assigned to
+    (Subject.class_levels, the Phase 9 M2M) - same "pass the parent via
+    __init__ to scope a queryset" shape as GradeBandForm taking
+    grading_scale above, and GuardianshipCreateForm taking parent in
+    Phase 4. Without this scoping, a Topic could be created against a
+    class_level the subject isn't even taught at.
+
+    `term` is left unfiltered (all Terms, any session) rather than
+    scoped to "current term only" - a school building out a syllabus
+    isn't necessarily doing so for the currently-active term, and
+    Topic.term is nullable specifically so schools that don't want
+    term-level granularity can skip it entirely.
+    """
+
+    class Meta:
+        model = Topic
+        fields = ["class_level", "term", "name", "description", "order"]
+        widgets = {
+            "class_level": forms.Select(attrs={"class": TAILWIND_INPUT}),
+            "term": forms.Select(attrs={"class": TAILWIND_INPUT}),
+            "name": forms.TextInput(attrs={"class": TAILWIND_INPUT}),
+            "description": forms.Textarea(attrs={"class": TAILWIND_INPUT, "rows": 3}),
+            "order": forms.NumberInput(attrs={"class": TAILWIND_INPUT}),
+        }
+
+    def __init__(self, *args, subject=None, **kwargs):
+        self.subject = subject
+        super().__init__(*args, **kwargs)
+        if self.subject is not None:
+            self.fields["class_level"].queryset = self.subject.class_levels.all()

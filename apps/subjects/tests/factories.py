@@ -4,7 +4,7 @@ from factory.django import DjangoModelFactory
 from apps.classes.models import ClassLevel
 from apps.classes.tests.factories import ClassLevelFactory
 
-from ..models import AssessmentComponent, GradeBand, GradingScale, SkillChecklistItem, Subject
+from ..models import AssessmentComponent, GradeBand, GradingScale, SkillChecklistItem, Subject, Topic
 
 
 class SubjectFactory(DjangoModelFactory):
@@ -51,3 +51,34 @@ class GradeBandFactory(DjangoModelFactory):
     label = "A"
     min_percentage = 75
     max_percentage = 100
+
+
+class TopicFactory(DjangoModelFactory):
+    """
+    `term` is deliberately left unset (defaults to None) rather than
+    wired to a SubFactory - Topic.term is nullable specifically for
+    schools that don't want term-level granularity, and there's no
+    confirmed apps.terms.tests.factories.TermFactory in evidence yet
+    to safely wire up sight-unseen. Tests that need a real term should
+    pass one explicitly: TopicFactory(term=SomeTermFactory()).
+
+    `class_level` is independent of `subject` by default - NOT added
+    to subject.class_levels. That's fine for model-level tests that
+    create a Topic directly (the FK has no DB-level constraint tying
+    it to the subject's class_levels; only TopicForm's queryset
+    scoping enforces that, at the view layer). View-level tests going
+    through TopicCreateView/TopicUpdateView must call
+    subject.class_levels.add(class_level) first, or TopicForm's
+    scoped dropdown will be empty and every POST will fail validation
+    - this bit SubjectFactory's default (no class_levels) the first
+    time through, so it's called out explicitly here.
+    """
+
+    class Meta:
+        model = Topic
+
+    subject = factory.SubFactory(SubjectFactory)
+    class_level = factory.SubFactory(ClassLevelFactory)
+    name = factory.Sequence(lambda n: f"Topic {n}")
+    description = factory.Sequence(lambda n: f"Description {n}")
+    order = 0

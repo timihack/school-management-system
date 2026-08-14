@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg">
+  <h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white mb-1">
+    {% if topic %}Edit Topic{% else %}Add Topic{% endif %}
+  </h1>
+  <p class="text-sm text-slate-500 dark:text-slate-400 mb-5">{{ subject.name }}</p>
+
+  <form method="post" class="space-y-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <p class="text-xs text-alert dark:text-red-400">{{ form.non_field_errors.0 }}</p>
+    {% endif %}
+    {% for field in form %}
+    <div>
+      <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+      <p class="text-xs text-alert dark:text-red-400 mt-1">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit"
+      class="w-full bg-ink-700 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-ink-800 transition-colors">
+      Save
+    </button>
+  </form>
+</div>
+{% endblock %}

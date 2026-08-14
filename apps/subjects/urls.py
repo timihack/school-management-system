@@ -45,4 +45,24 @@ urlpatterns = [
         views.GradeBandDeleteView.as_view(),
         name="grade_band_delete",
     ),
+    path(
+        "<int:subject_pk>/topics/create/",
+        views.TopicCreateView.as_view(),
+        name="topic_create",
+    ),
+    path(
+        "<int:subject_pk>/topics/<int:pk>/edit/",
+        views.TopicUpdateView.as_view(),
+        name="topic_update",
+    ),
+    path(
+        "topics/<int:pk>/delete/",
+        views.TopicDeleteView.as_view(),
+        name="topic_delete",
+    ),
+    path(
+        "curriculum/<int:level_pk>/",
+        views.CurriculumOverviewView.as_view(),
+        name="curriculum_overview",
+    ),
 ]

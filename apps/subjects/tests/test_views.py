@@ -4,9 +4,14 @@ from django.urls import reverse
 from apps.accounts.models import User
 from apps.accounts.tests.factories import UserFactory
 from apps.classes.tests.factories import ClassLevelFactory
-from apps.subjects.models import Subject
+from apps.subjects.models import Subject, Topic
 from apps.subjects.selectors import get_grade_for_percentage
-from apps.subjects.tests.factories import GradeBandFactory, GradingScaleFactory, SubjectFactory
+from apps.subjects.tests.factories import (
+    GradeBandFactory,
+    GradingScaleFactory,
+    SubjectFactory,
+    TopicFactory,
+)
 
 
 @pytest.mark.django_db
@@ -140,3 +145,141 @@ class TestGetGradeForPercentage:
         band = get_grade_for_percentage(scale.class_level, 50)
 
         assert band is None
+
+
+@pytest.mark.django_db
+class TestTopicCreateView:
+    def test_admin_can_create_topic(self, client):
+        admin = UserFactory(username="admin_topic1", password="pass12345", role=User.Role.ADMIN)
+        client.force_login(admin)
+        subject = SubjectFactory()
+        level = ClassLevelFactory()
+        subject.class_levels.add(level)
+
+        response = client.post(
+            reverse("subjects:topic_create", args=[subject.pk]),
+            {"class_level": level.pk, "term": "", "name": "Fractions", "description": "", "order": 0},
+        )
+
+        assert response.status_code == 302
+        assert Topic.objects.filter(subject=subject, name="Fractions").exists()
+
+    def test_staff_can_create_topic(self, client):
+        """
+        Confirms Curriculum management is genuinely BROADER than
+        Subject management (test_staff_cannot_create_subject above is
+        the direct contrast - Staff is blocked from Subject, but
+        allowed here).
+        """
+        staff = UserFactory(username="staff_topic1", password="pass12345", role=User.Role.STAFF)
+        client.force_login(staff)
+        subject = SubjectFactory()
+        level = ClassLevelFactory()
+        subject.class_levels.add(level)
+
+        response = client.post(
+            reverse("subjects:topic_create", args=[subject.pk]),
+            {"class_level": level.pk, "term": "", "name": "Fractions", "description": "", "order": 0},
+        )
+
+        assert response.status_code == 302
+        assert Topic.objects.filter(subject=subject, name="Fractions").exists()
+
+    def test_teacher_can_create_topic(self, client):
+        teacher = UserFactory(username="teacher_topic1", password="pass12345", role=User.Role.TEACHER)
+        client.force_login(teacher)
+        subject = SubjectFactory()
+        level = ClassLevelFactory()
+        subject.class_levels.add(level)
+
+        response = client.post(
+            reverse("subjects:topic_create", args=[subject.pk]),
+            {"class_level": level.pk, "term": "", "name": "Fractions", "description": "", "order": 0},
+        )
+
+        assert response.status_code == 302
+        assert Topic.objects.filter(subject=subject, name="Fractions").exists()
+
+    def test_student_is_forbidden(self, client):
+        student = UserFactory(username="student_topic1", password="pass12345", role=User.Role.STUDENT)
+        client.force_login(student)
+        subject = SubjectFactory()
+
+        response = client.get(reverse("subjects:topic_create", args=[subject.pk]))
+
+        assert response.status_code == 403
+
+
+@pytest.mark.django_db
+class TestTopicClassLevelScoping:
+    """
+    Confirms TopicForm's class_level queryset is genuinely scoped to
+    the subject's assigned class_levels, not every ClassLevel in the
+    system - same test-what-you-claim discipline as
+    TestGradeBandOverlapValidation above.
+    """
+
+    def test_class_level_not_assigned_to_subject_is_rejected(self, client):
+        admin = UserFactory(username="admin_topic2", password="pass12345", role=User.Role.ADMIN)
+        client.force_login(admin)
+        subject = SubjectFactory()
+        unrelated_level = ClassLevelFactory()  # deliberately NOT added to subject.class_levels
+
+        response = client.post(
+            reverse("subjects:topic_create", args=[subject.pk]),
+            {
+                "class_level": unrelated_level.pk,
+                "term": "",
+                "name": "Fractions",
+                "description": "",
+                "order": 0,
+            },
+        )
+
+        assert response.status_code == 200  # form re-rendered with a validation error
+        assert not Topic.objects.filter(subject=subject, name="Fractions").exists()
+
+
+@pytest.mark.django_db
+class TestTopicDeleteView:
+    def test_teacher_can_delete_topic(self, client):
+        teacher = UserFactory(username="teacher_topic2", password="pass12345", role=User.Role.TEACHER)
+        client.force_login(teacher)
+        topic = TopicFactory()
+
+        response = client.post(reverse("subjects:topic_delete", args=[topic.pk]))
+
+        assert response.status_code == 302
+        assert not Topic.objects.filter(pk=topic.pk).exists()
+
+    def test_student_cannot_delete_topic(self, client):
+        student = UserFactory(username="student_topic2", password="pass12345", role=User.Role.STUDENT)
+        client.force_login(student)
+        topic = TopicFactory()
+
+        response = client.post(reverse("subjects:topic_delete", args=[topic.pk]))
+
+        assert response.status_code == 403
+        assert Topic.objects.filter(pk=topic.pk).exists()
+
+
+@pytest.mark.django_db
+class TestCurriculumOverviewView:
+    def test_teacher_can_view_curriculum_overview(self, client):
+        teacher = UserFactory(username="teacher_topic3", password="pass12345", role=User.Role.TEACHER)
+        client.force_login(teacher)
+        topic = TopicFactory()
+
+        response = client.get(reverse("subjects:curriculum_overview", args=[topic.class_level.pk]))
+
+        assert response.status_code == 200
+        assert topic.subject in response.context["grouped_topics"]
+
+    def test_student_is_forbidden(self, client):
+        student = UserFactory(username="student_topic3", password="pass12345", role=User.Role.STUDENT)
+        client.force_login(student)
+        level = ClassLevelFactory()
+
+        response = client.get(reverse("subjects:curriculum_overview", args=[level.pk]))
+
+        assert response.status_code == 403

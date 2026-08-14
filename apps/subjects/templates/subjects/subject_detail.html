@@ -104,5 +104,49 @@
       {% endfor %}
     </div>
   </div>
+
+  <!--
+    Curriculum (Topic) management is DELIBERATELY broader than the two
+    sections above - Admin, Staff, AND Teacher can manage Topics (see
+    apps/subjects/permissions.py: CAN_MANAGE_TOPICS), not Admin-only
+    like Components/Skill Items. This is not an oversight - curriculum
+    content curation is a genuinely different kind of decision from
+    structural changes to the Subject itself.
+  -->
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-ink-700 dark:text-white">Curriculum</h2>
+      {% if request.user.role == "ADMIN" or request.user.role == "STAFF" or request.user.role == "TEACHER" %}
+      <a href="{% url 'subjects:topic_create' subject.pk %}" class="text-sm font-medium text-ink-700 dark:text-ink-100 hover:underline">+ Add Topic</a>
+      {% endif %}
+    </div>
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 shadow-sm">
+      {% for topic in topics %}
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="font-medium text-slate-800 dark:text-slate-100">
+            {{ topic.name }}
+            <span class="text-xs text-slate-400 font-normal">({{ topic.class_level.name }})</span>
+          </p>
+          {% if topic.description %}
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ topic.description }}</p>
+          {% endif %}
+        </div>
+        {% if request.user.role == "ADMIN" or request.user.role == "STAFF" or request.user.role == "TEACHER" %}
+        <div class="flex gap-3">
+          <a href="{% url 'subjects:topic_update' subject.pk topic.pk %}" class="text-xs text-ink-700 dark:text-ink-100 hover:underline">Edit</a>
+          <form method="post" action="{% url 'subjects:topic_delete' topic.pk %}"
+                onsubmit="return confirm('Remove {{ topic.name }}?');">
+            {% csrf_token %}
+            <button type="submit" class="text-xs text-alert dark:text-red-400 hover:underline">Remove</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="p-4 text-sm text-slate-400 dark:text-slate-500">No topics defined yet.</p>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock %}
