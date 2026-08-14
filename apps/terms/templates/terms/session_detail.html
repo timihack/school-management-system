@@ -4,22 +4,22 @@
 <div class="max-w-2xl space-y-6">
   <div>
     <div class="flex items-center justify-between mb-4">
-      <h1 class="text-xl font-semibold text-slate-800">{{ session.name }}</h1>
+      <h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white">{{ session.name }}</h1>
     </div>
 
-    <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
-      <div><dt class="text-slate-500">Start Date</dt><dd>{{ session.start_date }}</dd></div>
-      <div><dt class="text-slate-500">End Date</dt><dd>{{ session.end_date }}</dd></div>
+    <dl class="grid grid-cols-2 gap-4 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div><dt class="text-slate-500 dark:text-slate-400">Start Date</dt><dd class="text-slate-800 dark:text-slate-200">{{ session.start_date }}</dd></div>
+      <div><dt class="text-slate-500 dark:text-slate-400">End Date</dt><dd class="text-slate-800 dark:text-slate-200">{{ session.end_date }}</dd></div>
     </dl>
 
     {% if request.user.role == "ADMIN" %}
     <div class="mt-4 flex gap-3">
       <a href="{% url 'terms:session_update' session.pk %}"
-         class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+         class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Edit</a>
       <form method="post" action="{% url 'terms:session_delete' session.pk %}"
             onsubmit="return confirm('Delete {{ session.name }}? This is blocked if any student has enrollment history in this session.');">
         {% csrf_token %}
-        <button type="submit" class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-alert-soft text-alert text-sm hover:bg-red-100 dark:bg-alert/10 dark:hover:bg-alert/20 transition-colors">
           Delete
         </button>
       </form>
@@ -29,22 +29,29 @@
 
   <div>
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold text-slate-800">Terms</h2>
+      <h2 class="text-lg font-semibold text-ink-700 dark:text-white">Terms</h2>
       {% if request.user.role == "ADMIN" %}
-      <a href="{% url 'terms:term_create' session.pk %}" class="text-sm font-medium text-indigo-600 hover:underline">+ Add Term</a>
+      <a href="{% url 'terms:term_create' session.pk %}" class="text-sm font-medium text-ink-700 dark:text-ink-100 hover:underline">+ Add Term</a>
       {% endif %}
     </div>
-    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 shadow-sm">
       {% for term in terms %}
       <div class="flex items-center justify-between p-4">
         <div>
-          <p class="font-medium text-slate-800">
+          <p class="font-medium text-slate-800 dark:text-slate-100">
             {{ term.get_name_display }}
             {% if term.is_current %}
-            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Current</span>
+            <!--
+              Regular status pill, NOT the gold medallion - "Current"
+              indicates which term is active right now, not a ranked
+              achievement. Reserving the medallion for genuinely earned
+              top results (see docs/DESIGN_SYSTEM.md) is what keeps it
+              meaningful.
+            -->
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-pass-soft text-pass dark:bg-pass/15 dark:text-emerald-300">Current</span>
             {% endif %}
           </p>
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
             {{ term.start_date }} - {{ term.end_date }}
             {% if term.next_term_begins %} · Next term begins {{ term.next_term_begins }}{% endif %}
             {% if term.total_school_days %} · {{ term.total_school_days }} school days{% endif %}
@@ -56,20 +63,20 @@
           <form method="post" action="{% url 'terms:term_activate' term.pk %}"
                 onsubmit="return confirm('Make {{ term }} the current term?');">
             {% csrf_token %}
-            <button type="submit" class="text-emerald-600 hover:underline">Activate</button>
+            <button type="submit" class="text-pass dark:text-emerald-400 hover:underline">Activate</button>
           </form>
           {% endif %}
-          <a href="{% url 'terms:term_update' term.pk %}" class="text-indigo-600 hover:underline">Edit</a>
+          <a href="{% url 'terms:term_update' term.pk %}" class="text-ink-700 dark:text-ink-100 hover:underline">Edit</a>
           <form method="post" action="{% url 'terms:term_delete' term.pk %}"
                 onsubmit="return confirm('Delete {{ term }}?');">
             {% csrf_token %}
-            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+            <button type="submit" class="text-alert dark:text-red-400 hover:underline">Delete</button>
           </form>
         </div>
         {% endif %}
       </div>
       {% empty %}
-      <p class="p-4 text-sm text-slate-400">No terms created yet.</p>
+      <p class="p-4 text-sm text-slate-400 dark:text-slate-500">No terms created yet.</p>
       {% endfor %}
     </div>
   </div>

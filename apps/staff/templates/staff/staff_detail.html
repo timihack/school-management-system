@@ -3,31 +3,31 @@
 {% block content %}
 <div class="max-w-2xl">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold text-slate-800">
+    <h1 class="font-display text-2xl font-semibold text-ink-700 dark:text-white">
       {{ staff.user.get_full_name|default:staff.user.username }}
     </h1>
     {% include "staff/partials/staff_status_badge.html" %}
   </div>
 
-  <dl class="grid grid-cols-2 gap-4 text-sm bg-white border border-slate-200 rounded-xl p-6">
-    <div><dt class="text-slate-500">Employee ID</dt><dd>{{ staff.employee_id }}</dd></div>
-    <div><dt class="text-slate-500">Job Title</dt><dd>{{ staff.job_title|default:"—" }}</dd></div>
+  <dl class="grid grid-cols-2 gap-4 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+    <div><dt class="text-slate-500 dark:text-slate-400">Employee ID</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.employee_id }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Job Title</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.job_title|default:"—" }}</dd></div>
     <div>
-      <dt class="text-slate-500">Department</dt>
+      <dt class="text-slate-500 dark:text-slate-400">Department</dt>
       <dd>
         {% if staff.department %}
-        <a href="{% url 'departments:detail' staff.department.pk %}" class="text-indigo-600 hover:underline">
+        <a href="{% url 'departments:detail' staff.department.pk %}" class="text-ink-700 dark:text-ink-100 hover:underline">
           {{ staff.department.name }}
         </a>
-        {% else %}—{% endif %}
+        {% else %}<span class="text-slate-800 dark:text-slate-200">—</span>{% endif %}
       </dd>
     </div>
-    <div><dt class="text-slate-500">Employment Type</dt><dd>{{ staff.get_employment_type_display }}</dd></div>
-    <div><dt class="text-slate-500">Date Joined</dt><dd>{{ staff.date_joined }}</dd></div>
-    <div><dt class="text-slate-500">Date of Birth</dt><dd>{{ staff.date_of_birth }}</dd></div>
-    <div><dt class="text-slate-500">Phone</dt><dd>{{ staff.phone_number|default:"—" }}</dd></div>
-    <div><dt class="text-slate-500">Email</dt><dd>{{ staff.user.email }}</dd></div>
-    <div class="col-span-2"><dt class="text-slate-500">Address</dt><dd>{{ staff.address|default:"—" }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Employment Type</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.get_employment_type_display }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Date Joined</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.date_joined }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Date of Birth</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.date_of_birth }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Phone</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.phone_number|default:"—" }}</dd></div>
+    <div><dt class="text-slate-500 dark:text-slate-400">Email</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.user.email }}</dd></div>
+    <div class="col-span-2"><dt class="text-slate-500 dark:text-slate-400">Address</dt><dd class="text-slate-800 dark:text-slate-200">{{ staff.address|default:"—" }}</dd></div>
   </dl>
 
   <!--
@@ -38,13 +38,13 @@
   {% if request.user.role == "ADMIN" or staff.user_id == request.user.id %}
   <div class="mt-4 flex gap-3">
     <a href="{% url 'staff:update' staff.pk %}"
-       class="px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</a>
+       class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Edit</a>
     {% if request.user.role == "ADMIN" and staff.is_active %}
     <button hx-post="{% url 'staff:deactivate' staff.pk %}"
             hx-target="#staff-status-badge-{{ staff.pk }}"
             hx-swap="outerHTML"
             hx-confirm="Deactivate {{ staff.user.get_full_name }}? They will no longer be able to log in."
-            class="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100">
+            class="px-4 py-2 rounded-lg bg-alert-soft text-alert text-sm hover:bg-red-100 dark:bg-alert/10 dark:hover:bg-alert/20 transition-colors">
       Deactivate
     </button>
     {% endif %}

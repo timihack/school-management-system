@@ -1,7 +1,7 @@
 {% if selected_class_level and selected_class_level.has_arms %}
 <div class="mb-4">
   <select name="class_arm"
-          class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          class="rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ink-600"
           hx-get="{% url 'attendance:register' %}"
           hx-target="#picker-and-roster"
           hx-trigger="change"
@@ -17,9 +17,9 @@
 {% endif %}
 
 {% if needs_arm_selection %}
-<p class="text-slate-400 text-sm">This class has arms - select one to continue.</p>
+<p class="text-slate-400 dark:text-slate-500 text-sm">This class has arms - select one to continue.</p>
 {% elif not selected_class_level %}
-<p class="text-slate-400 text-sm">Select a class to take or view attendance.</p>
+<p class="text-slate-400 dark:text-slate-500 text-sm">Select a class to take or view attendance.</p>
 {% else %}
 {% include "attendance/partials/roster_table.html" %}
 {% endif %}
